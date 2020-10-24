@@ -24,11 +24,7 @@
         <module>thingifier</module>
         <module>examplemodels</module>
         <module>todoManagerRestAuto</module>
-        <module>challenger</module>
-        <module>challengerAuto</module>
-        <module>standAloneTodoListRestApi</module>
         <module>standAloneTodoListManagerRestApi</module>
-        <module>thingifierapp</module>
         <module>swaggerizer</module>
     </modules>
 
