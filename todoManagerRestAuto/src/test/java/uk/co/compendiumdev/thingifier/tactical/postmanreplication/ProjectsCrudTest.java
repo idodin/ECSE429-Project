@@ -1,0 +1,803 @@
+package uk.co.compendiumdev.thingifier.tactical.postmanreplication;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import io.restassured.path.json.JsonPath;
+import org.apache.http.HttpStatus;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class ProjectsCrudTest {
+    // Projects Paths
+    private static final String ALL_PROJECTS_PATH = "/projects";
+    private static final String SPECIFIC_PROJECT_PATH = "/projects/{id}";
+    private static final String CLEAR_PATH = "/admin/data/thingifier";
+    private static final String PROJECTS = "projects";
+
+    // Project Fields
+    private static final String ID = "id";
+    private static final String TITLE = "title";
+    private static final String DESCRIPTION = "description";
+    private static final String COMPLETED = "completed";
+    private static final String ACTIVE = "active";
+
+    // Test Fields
+    private static final String TEST_TITLE = "Some project title";
+    private static final String TEST_DESCRIPTION = "Some project description";
+    private static final String OTHER_TEST_TITLE = "Some other project title";
+    private static final String OTHER_TEST_DESCRIPTION = "Some other project description";
+
+    // Useful Constants
+    private static final String EMPTY_STRING = "";
+    private static final String WHITESPACE_STRING = " ";
+    private static final String TRUE = "true";
+    private static final String FALSE = "false";
+    private static final int SOME_INTEGER = 1;
+    private static final boolean SOME_BOOLEAN = true;
+
+    // Response Codes
+
+    @BeforeEach
+    public void clearDataFromEnv(){
+
+        RestAssured.baseURI = Environment.getBaseUri();
+
+        post(CLEAR_PATH);
+
+        final JsonPath clearedData = when().get(ALL_PROJECTS_PATH)
+                .then().statusCode(200).extract().body().jsonPath();
+
+        final int newNumberOfProjects = clearedData.getList(PROJECTS).size();
+
+        // Assume instead of
+        Assumptions.assumeTrue(newNumberOfProjects == 0);
+    }
+
+    @Test
+    public int postCreatesWithFullBody(){
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(TITLE, TEST_TITLE);
+        givenBody.put(DESCRIPTION, TEST_DESCRIPTION);
+        givenBody.put(ACTIVE, true);
+        givenBody.put(COMPLETED, false);
+
+        String id = given().
+            body(givenBody).
+        when().
+            post(ALL_PROJECTS_PATH)
+        .then()
+            .contentType(ContentType.JSON)
+            .statusCode(HttpStatus.SC_CREATED)
+            .body(
+                    TITLE, equalTo(TEST_TITLE),
+                    DESCRIPTION, equalTo(TEST_DESCRIPTION),
+                    ACTIVE, equalTo(TRUE),
+                    COMPLETED, equalTo(FALSE)
+                )
+                .extract()
+                .path(ID);
+
+        return Integer.parseInt(id);
+    }
+
+    @Test
+    public void postCreatesWithoutActive(){
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(TITLE, TEST_TITLE);
+        givenBody.put(DESCRIPTION, TEST_DESCRIPTION);
+        givenBody.put(COMPLETED, false);
+
+        given().
+                body(givenBody).
+                when().
+                post(ALL_PROJECTS_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(HttpStatus.SC_CREATED)
+                .body(
+                        TITLE, equalTo(TEST_TITLE),
+                        DESCRIPTION, equalTo(TEST_DESCRIPTION),
+                        ACTIVE, equalTo(FALSE),
+                        COMPLETED, equalTo(FALSE)
+                );
+    }
+
+    @Test
+    public void postCreatesWithoutCompleted(){
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(TITLE, TEST_TITLE);
+        givenBody.put(DESCRIPTION, TEST_DESCRIPTION);
+        givenBody.put(ACTIVE, true);
+
+        given().
+                body(givenBody).
+                when().
+                post(ALL_PROJECTS_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(HttpStatus.SC_CREATED)
+                .body(
+                        TITLE, equalTo(TEST_TITLE),
+                        DESCRIPTION, equalTo(TEST_DESCRIPTION),
+                        ACTIVE, equalTo(TRUE),
+                        COMPLETED, equalTo(FALSE)
+                );
+    }
+
+    @Test
+    public void postCreatesWithoutDescription(){
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(TITLE, TEST_TITLE);
+        givenBody.put(ACTIVE, true);
+        givenBody.put(COMPLETED, false);
+
+        given().
+                body(givenBody).
+                when().
+                post(ALL_PROJECTS_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(HttpStatus.SC_CREATED)
+                .body(
+                        TITLE, equalTo(TEST_TITLE),
+                        DESCRIPTION, equalTo(EMPTY_STRING),
+                        ACTIVE, equalTo(TRUE),
+                        COMPLETED, equalTo(FALSE)
+                );
+    }
+
+    @Test
+    public void postCreatesWithIntegerTitleConverted(){
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(TITLE, SOME_INTEGER);
+        givenBody.put(DESCRIPTION, TEST_DESCRIPTION);
+        givenBody.put(ACTIVE, true);
+        givenBody.put(COMPLETED, false);
+
+        given().
+                body(givenBody).
+                when().
+                post(ALL_PROJECTS_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(HttpStatus.SC_CREATED)
+                .body(
+                        TITLE, equalTo(Double.toString(SOME_INTEGER)),
+                        DESCRIPTION, equalTo(TEST_DESCRIPTION),
+                        ACTIVE, equalTo(TRUE),
+                        COMPLETED, equalTo(FALSE)
+                );
+    }
+
+    @Test
+    public void postCreatesWithBooleanTitleConverted(){
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(TITLE, SOME_BOOLEAN);
+        givenBody.put(DESCRIPTION, TEST_DESCRIPTION);
+        givenBody.put(ACTIVE, true);
+        givenBody.put(COMPLETED, false);
+
+        given().
+                body(givenBody).
+                when().
+                post(ALL_PROJECTS_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(HttpStatus.SC_CREATED)
+                .body(
+                        TITLE, equalTo(Boolean.toString(SOME_BOOLEAN)),
+                        DESCRIPTION, equalTo(TEST_DESCRIPTION),
+                        ACTIVE, equalTo(TRUE),
+                        COMPLETED, equalTo(FALSE)
+                );
+    }
+
+    @Test
+    public void postCreatesWithIntegerDescriptionConverted(){
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(TITLE, TEST_TITLE);
+        givenBody.put(DESCRIPTION, SOME_INTEGER);
+        givenBody.put(ACTIVE, true);
+        givenBody.put(COMPLETED, false);
+
+        given().
+                body(givenBody).
+                when().
+                post(ALL_PROJECTS_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(HttpStatus.SC_CREATED)
+                .body(
+                        TITLE, equalTo(TEST_TITLE),
+                        DESCRIPTION, equalTo(Double.toString(SOME_INTEGER)),
+                        ACTIVE, equalTo(TRUE),
+                        COMPLETED, equalTo(FALSE)
+                );
+    }
+
+    @Test
+    public void postCreatesWithBooleanDescriptionConverted(){
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(TITLE, TEST_TITLE);
+        givenBody.put(DESCRIPTION, SOME_BOOLEAN);
+        givenBody.put(ACTIVE, true);
+        givenBody.put(COMPLETED, false);
+
+        given().
+                body(givenBody).
+                when().
+                post(ALL_PROJECTS_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(HttpStatus.SC_CREATED)
+                .body(
+                        TITLE, equalTo(TEST_TITLE),
+                        DESCRIPTION, equalTo(Boolean.toString(SOME_BOOLEAN)),
+                        ACTIVE, equalTo(TRUE),
+                        COMPLETED, equalTo(FALSE)
+                );
+    }
+
+    @Test
+    public void postRejectsIntegerActive(){
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(TITLE, TEST_TITLE);
+        givenBody.put(DESCRIPTION, TEST_DESCRIPTION);
+        givenBody.put(ACTIVE, SOME_INTEGER);
+        givenBody.put(COMPLETED, false);
+
+        given().
+                body(givenBody).
+                when().
+                post(ALL_PROJECTS_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(HttpStatus.SC_BAD_REQUEST);
+    }
+
+    @Test
+    public void postRejectsIntegerCompleted(){
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(TITLE, TEST_TITLE);
+        givenBody.put(DESCRIPTION, TEST_DESCRIPTION);
+        givenBody.put(ACTIVE, true);
+        givenBody.put(COMPLETED, SOME_INTEGER);
+
+        given().
+                body(givenBody).
+                when().
+                post(ALL_PROJECTS_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(HttpStatus.SC_BAD_REQUEST);
+    }
+
+    // BUG - TITLE CAN BE MISSING
+    // CURRENT BEHAVIOUR
+    @Test
+    public void postWithMissingTitleReturnsEmptyTitle(){
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(DESCRIPTION, TEST_DESCRIPTION);
+        givenBody.put(ACTIVE, true);
+        givenBody.put(COMPLETED, false);
+
+        given().
+                body(givenBody).
+                when().
+                post(ALL_PROJECTS_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(HttpStatus.SC_CREATED)
+                .body(
+                        TITLE, equalTo(EMPTY_STRING),
+                        DESCRIPTION, equalTo(TEST_DESCRIPTION),
+                        ACTIVE, equalTo(TRUE),
+                        COMPLETED, equalTo(FALSE)
+                );
+    }
+
+    // DOES NOT HAVE EXPECTED BEHAVIOUR
+    @Test
+    public void postWithMissingTitleDoesNotReject(){
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(DESCRIPTION, TEST_DESCRIPTION);
+        givenBody.put(ACTIVE, true);
+        givenBody.put(COMPLETED, false);
+
+        given().
+                body(givenBody).
+                when().
+                post(ALL_PROJECTS_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(not(equalTo(HttpStatus.SC_BAD_REQUEST)));
+    }
+
+    // BUG - TITLE CAN BE EMPTY STRING
+    // CURRENT BEHAVIOUR
+    @Test
+    public void postWithEmptyTitleReturnsEmptyTitle(){
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(TITLE, EMPTY_STRING);
+        givenBody.put(DESCRIPTION, TEST_DESCRIPTION);
+        givenBody.put(ACTIVE, true);
+        givenBody.put(COMPLETED, false);
+
+        given().
+                body(givenBody).
+                when().
+                post(ALL_PROJECTS_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(HttpStatus.SC_CREATED)
+                .body(
+                        TITLE, equalTo(EMPTY_STRING),
+                        DESCRIPTION, equalTo(TEST_DESCRIPTION),
+                        ACTIVE, equalTo(TRUE),
+                        COMPLETED, equalTo(FALSE)
+                );
+    }
+
+    // DOES NOT HAVE EXPECTED BEHAVIOUR
+    @Test
+    public void postWithEmptyTitleDoesNotReject(){
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(TITLE, EMPTY_STRING);
+        givenBody.put(DESCRIPTION, TEST_DESCRIPTION);
+        givenBody.put(ACTIVE, true);
+        givenBody.put(COMPLETED, false);
+
+        given().
+                body(givenBody).
+                when().
+                post(ALL_PROJECTS_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(not(equalTo(HttpStatus.SC_BAD_REQUEST)));
+    }
+
+    // BUG - TITLE CAN BE WHITESPACE
+    // CURRENT BEHAVIOUR
+    @Test
+    public void postWithWhitespaceTitleReturnsEmptyTitle(){
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(TITLE, WHITESPACE_STRING);
+        givenBody.put(DESCRIPTION, TEST_DESCRIPTION);
+        givenBody.put(ACTIVE, true);
+        givenBody.put(COMPLETED, false);
+
+        given().
+                body(givenBody).
+                when().
+                post(ALL_PROJECTS_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(HttpStatus.SC_CREATED)
+                .body(
+                        TITLE, equalTo(WHITESPACE_STRING),
+                        DESCRIPTION, equalTo(TEST_DESCRIPTION),
+                        ACTIVE, equalTo(TRUE),
+                        COMPLETED, equalTo(FALSE)
+                );
+    }
+
+    // DOES NOT HAVE EXPECTED BEHAVIOUR
+    @Test
+    public void postWithWhitespaceTitleDoesNotReject(){
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(TITLE, WHITESPACE_STRING);
+        givenBody.put(DESCRIPTION, TEST_DESCRIPTION);
+        givenBody.put(ACTIVE, true);
+        givenBody.put(COMPLETED, false);
+
+        given().
+                body(givenBody).
+                when().
+                post(ALL_PROJECTS_PATH).
+                then().
+                contentType(ContentType.JSON).
+                statusCode(not(equalTo(HttpStatus.SC_BAD_REQUEST)));
+    }
+
+    @Test
+    public void getProjectsReturnsAllProjects(){
+        // Create Three Random projects
+        postCreatesWithFullBody();
+        postCreatesWithBooleanTitleConverted();
+        postCreatesWithIntegerTitleConverted();
+
+        List<Map<String, Object>> projects = when().
+                get(ALL_PROJECTS_PATH).
+                then().
+                contentType(ContentType.JSON).
+                statusCode(HttpStatus.SC_OK).
+                extract().
+                body().
+                jsonPath().
+                getList(PROJECTS);
+
+        Assertions.assertTrue(
+                projects.size() == 3 &&
+                projects.stream().allMatch(
+                        object -> object.get(TITLE).equals(TEST_TITLE) ||
+                                object.get(TITLE).equals(Double.toString(SOME_INTEGER)) ||
+                                object.get(TITLE).equals(Boolean.toString(SOME_BOOLEAN))
+                )
+        );
+    }
+
+    @Test
+    public void putProjectsNotAllowed(){
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(TITLE, TEST_TITLE);
+        givenBody.put(DESCRIPTION, TEST_DESCRIPTION);
+        givenBody.put(ACTIVE, true);
+        givenBody.put(COMPLETED, false);
+
+        given().
+                body(givenBody).
+                when().
+                put(ALL_PROJECTS_PATH)
+                .then()
+                .statusCode(HttpStatus.SC_METHOD_NOT_ALLOWED);
+    }
+
+    @Test
+    public void patchProjectsNotAllowed(){
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(TITLE, TEST_TITLE);
+        givenBody.put(DESCRIPTION, TEST_DESCRIPTION);
+        givenBody.put(ACTIVE, true);
+        givenBody.put(COMPLETED, false);
+
+        given().
+                body(givenBody).
+                when().
+                patch(ALL_PROJECTS_PATH)
+                .then()
+                .statusCode(HttpStatus.SC_METHOD_NOT_ALLOWED);
+    }
+
+    @Test
+    public void deleteProjectsNotAllowed(){
+        when().
+                patch(ALL_PROJECTS_PATH).
+                then().
+                statusCode(HttpStatus.SC_METHOD_NOT_ALLOWED);
+    }
+
+    @Test
+    public void getSpecificProjectReturnsBody() {
+        int id = postCreatesWithFullBody();
+
+        Map<String, Object> project = (Map<String, Object>)given().
+                pathParam(ID, id).
+        when().
+                get(SPECIFIC_PROJECT_PATH).
+        then().
+                statusCode(HttpStatus.SC_OK).
+                contentType(ContentType.JSON).
+                extract().
+                body().
+                jsonPath().
+                getList(PROJECTS).
+                get(0);
+
+        Assertions.assertTrue(
+                project.get(ID).equals(String.valueOf(id)) &&
+                project.get(TITLE).equals(TEST_TITLE) &&
+                project.get(DESCRIPTION).equals(TEST_DESCRIPTION) &&
+                project.get(ACTIVE).equals(TRUE) &&
+                project.get(COMPLETED).equals(FALSE)
+        );
+
+    }
+
+    @Test
+    public void getSpecificProjectReturnsNotFound() {
+
+        given().
+                pathParam(ID, 10001).
+                when().
+                get(SPECIFIC_PROJECT_PATH).
+                then().
+                statusCode(HttpStatus.SC_NOT_FOUND).
+                contentType(ContentType.JSON);
+
+    }
+
+    @Test
+    public void getSpecificProjectHandlesNonIntegerID() {
+
+        given().
+                pathParam(ID, "fdsafa").
+                when().
+                get(SPECIFIC_PROJECT_PATH).
+                then().
+                statusCode(HttpStatus.SC_NOT_FOUND).
+                contentType(ContentType.JSON);
+
+    }
+
+    @Test
+    public void putSpecificUpdatesWithFullBody(){
+        int id = postCreatesWithFullBody();
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(TITLE, OTHER_TEST_TITLE);
+        givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
+        givenBody.put(ACTIVE, false);
+        givenBody.put(COMPLETED, true);
+
+        given().
+                pathParam(ID, id).
+                body(givenBody).
+                when().
+                put(SPECIFIC_PROJECT_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(HttpStatus.SC_OK)
+                .body(
+                        ID, equalTo(String.valueOf(id)),
+                        TITLE, equalTo(OTHER_TEST_TITLE),
+                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION),
+                        ACTIVE, equalTo(FALSE),
+                        COMPLETED, equalTo(TRUE)
+                );
+    }
+
+    @Test
+    public void putSpecificUpdatesWithIntegerTitleConverted(){
+        int id = postCreatesWithFullBody();
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(TITLE, SOME_INTEGER);
+        givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
+        givenBody.put(ACTIVE, false);
+        givenBody.put(COMPLETED, true);
+
+        given().
+                pathParam(ID, id).
+                body(givenBody).
+                when().
+                put(SPECIFIC_PROJECT_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(HttpStatus.SC_OK)
+                .body(
+                        ID, equalTo(String.valueOf(id)),
+                        TITLE, equalTo(Double.toString(SOME_INTEGER)),
+                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION),
+                        ACTIVE, equalTo(FALSE),
+                        COMPLETED, equalTo(TRUE)
+                );
+    }
+
+    @Test
+    public void putSpecificUpdatesWithBooleanTitleConverted(){
+        int id = postCreatesWithFullBody();
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(TITLE, SOME_BOOLEAN);
+        givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
+        givenBody.put(ACTIVE, false);
+        givenBody.put(COMPLETED, true);
+
+        given().
+                pathParam(ID, id).
+                body(givenBody).
+                when().
+                put(SPECIFIC_PROJECT_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(HttpStatus.SC_OK)
+                .body(
+                        ID, equalTo(String.valueOf(id)),
+                        TITLE, equalTo(Boolean.toString(SOME_BOOLEAN)),
+                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION),
+                        ACTIVE, equalTo(FALSE),
+                        COMPLETED, equalTo(TRUE)
+                );
+    }
+
+    @Test
+    public void putSpecificUpdatesWithoutDescription(){
+        int id = postCreatesWithFullBody();
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(TITLE, OTHER_TEST_TITLE);
+        givenBody.put(ACTIVE, false);
+        givenBody.put(COMPLETED, true);
+
+        given().
+                pathParam(ID, id).
+                body(givenBody).
+                when().
+                put(SPECIFIC_PROJECT_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(HttpStatus.SC_OK)
+                .body(
+                        TITLE, equalTo(OTHER_TEST_TITLE),
+                        DESCRIPTION, equalTo(EMPTY_STRING),
+                        ACTIVE, equalTo(FALSE),
+                        COMPLETED, equalTo(TRUE)
+                );
+    }
+
+    @Test
+    public void putSpecificUpdatesWithoutActive(){
+        int id = postCreatesWithFullBody();
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(TITLE, OTHER_TEST_TITLE);
+        givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
+        givenBody.put(COMPLETED, true);
+
+        given().
+                pathParam(ID, id).
+                body(givenBody).
+                when().
+                put(SPECIFIC_PROJECT_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(HttpStatus.SC_OK)
+                .body(
+                        ID, equalTo(String.valueOf(id)),
+                        TITLE, equalTo(OTHER_TEST_TITLE),
+                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION),
+                        ACTIVE, equalTo(FALSE),
+                        COMPLETED, equalTo(TRUE)
+                );
+    }
+
+    @Test
+    public void putSpecificUpdatesWithoutCompleted(){
+        int id = postCreatesWithFullBody();
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(TITLE, OTHER_TEST_TITLE);
+        givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
+        givenBody.put(ACTIVE, false);
+
+        given().
+                pathParam(ID, id).
+                body(givenBody).
+                when().
+                put(SPECIFIC_PROJECT_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(HttpStatus.SC_OK)
+                .body(
+                        ID, equalTo(String.valueOf(id)),
+                        TITLE, equalTo(OTHER_TEST_TITLE),
+                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION),
+                        ACTIVE, equalTo(FALSE),
+                        COMPLETED, equalTo(FALSE)
+                );
+    }
+
+    // BUG - TITLE CAN BE MISSING
+    // CURRENT BEHAVIOUR
+    @Test
+    public void putSpecificWithEmptyTitleReturnsEmptyTitle(){
+        int id = postCreatesWithFullBody();
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
+        givenBody.put(COMPLETED, true);
+        givenBody.put(ACTIVE, false);
+
+        given().
+                pathParam(ID, id).
+                body(givenBody).
+                when().
+                put(SPECIFIC_PROJECT_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(HttpStatus.SC_OK)
+                .body(
+                        ID, equalTo(String.valueOf(id)),
+                        TITLE, equalTo(EMPTY_STRING),
+                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION),
+                        ACTIVE, equalTo(FALSE),
+                        COMPLETED, equalTo(TRUE)
+                );
+    }
+
+    //DOES NOT HAVE EXPECTED BEHAVIOUR
+    @Test
+    public void putSpecificWithEmptyTitleDoesNotReject(){
+        int id = postCreatesWithFullBody();
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
+        givenBody.put(COMPLETED, true);
+        givenBody.put(ACTIVE, false);
+
+        given().
+                pathParam(ID, id).
+                body(givenBody).
+                when().
+                put(SPECIFIC_PROJECT_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(not(equalTo(HttpStatus.SC_BAD_REQUEST)));
+    }
+
+    // BUG - TITLE CAN BE MISSING
+    // CURRENT BEHAVIOUR
+    @Test
+    public void putSpecificWithWhitespaceTitleReturnsEmptyTitle(){
+        int id = postCreatesWithFullBody();
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(TITLE, WHITESPACE_STRING);
+        givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
+        givenBody.put(COMPLETED, true);
+        givenBody.put(ACTIVE, false);
+
+        given().
+                pathParam(ID, id).
+                body(givenBody).
+                when().
+                put(SPECIFIC_PROJECT_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(HttpStatus.SC_OK)
+                .body(
+                        ID, equalTo(String.valueOf(id)),
+                        TITLE, equalTo(WHITESPACE_STRING),
+                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION),
+                        ACTIVE, equalTo(FALSE),
+                        COMPLETED, equalTo(TRUE)
+                );
+    }
+
+    //DOES NOT HAVE EXPECTED BEHAVIOUR
+    @Test
+    public void putSpecificWithWhitespaceTitleDoesNotReject(){
+        int id = postCreatesWithFullBody();
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(TITLE, WHITESPACE_STRING);
+        givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
+        givenBody.put(COMPLETED, true);
+        givenBody.put(ACTIVE, false);
+
+        given().
+                pathParam(ID, id).
+                body(givenBody).
+                when().
+                put(SPECIFIC_PROJECT_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(not(equalTo(HttpStatus.SC_BAD_REQUEST)));
+    }
+
+}
