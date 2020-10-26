@@ -3,11 +3,9 @@ package uk.co.compendiumdev.thingifier.tactical.postmanreplication;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
+import io.restassured.response.Response;
 import org.apache.http.HttpStatus;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -26,22 +24,21 @@ import java.util.List;
 import java.util.Map;
 
 import static io.restassured.RestAssured.*;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.not;
 
-public class ProjectsCrudTest {
+public class CategoriesCrudTest {
     // Projects Paths
-    private static final String ALL_PROJECTS_PATH = "/projects";
-    private static final String SPECIFIC_PROJECT_PATH = "/projects/{id}";
+    private static final String ALL_CATEGORIES_PATH = "/categories";
+    private static final String SPECIFIC_CATEGORIES_PATH = "/categories/{id}";
     private static final String CLEAR_PATH = "/admin/data/thingifier";
-    private static final String PROJECTS = "projects";
-    private static final String PROJECT = "project";
+    private static final String CATEGORIES = "categories";
+    private static final String CATEGORY = "category";
 
     // Project Fields
     private static final String ID = "id";
     private static final String TITLE = "title";
     private static final String DESCRIPTION = "description";
-    private static final String COMPLETED = "completed";
-    private static final String ACTIVE = "active";
 
     // Test Fields
     private static final String TEST_TITLE = "Some project title";
@@ -58,48 +55,57 @@ public class ProjectsCrudTest {
     private static final int SOME_INTEGER = 1;
     private static final boolean SOME_BOOLEAN = true;
 
-    // Response Codes
 
     @BeforeEach
     public void clearDataFromEnv(){
 
         RestAssured.baseURI = Environment.getBaseUri();
 
+        // Make post request to Clear Data Path
         post(CLEAR_PATH);
 
-        final JsonPath clearedData = when().get(ALL_PROJECTS_PATH)
-                .then().statusCode(200).extract().body().jsonPath();
+        // Gets all categories
+        final JsonPath clearedData =
+                when().
+                        get(ALL_CATEGORIES_PATH).
+                then().
+                        statusCode(200).
+                        extract().body().jsonPath();
 
-        final int newNumberOfProjects = clearedData.getList(PROJECTS).size();
+        // Gets number of categories after clearing
+        final int newNumberOfCategories = clearedData.getList(CATEGORIES).size();
 
-        // Assume instead of
-        Assumptions.assumeTrue(newNumberOfProjects == 0);
+        // Make sure that number of categories after clearing is 0
+        Assumptions.assumeTrue(newNumberOfCategories == 0);
     }
 
     @Test
     public int postCreatesWithFullBody(){
-
+        // Map contains key value pairs for JSON
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, TEST_TITLE);
         givenBody.put(DESCRIPTION, TEST_DESCRIPTION);
-        givenBody.put(ACTIVE, true);
-        givenBody.put(COMPLETED, false);
 
-        String id = given().
-            body(givenBody).
-        when().
-            post(ALL_PROJECTS_PATH)
-        .then()
-            .contentType(ContentType.JSON)
-            .statusCode(HttpStatus.SC_CREATED)
-            .body(
-                    TITLE, equalTo(TEST_TITLE),
-                    DESCRIPTION, equalTo(TEST_DESCRIPTION),
-                    ACTIVE, equalTo(TRUE),
-                    COMPLETED, equalTo(FALSE)
-                )
-                .extract()
-                .path(ID);
+        String id =
+                // Sets up request
+                given().
+                        body(givenBody).
+                // Executes request
+                when().
+                        post(ALL_CATEGORIES_PATH).
+                // Checks output of the request
+                then().
+                        // CHECKS CONTENT TYPE
+                        contentType(ContentType.JSON).
+                        // CHECKS STATUS CODE
+                        statusCode(HttpStatus.SC_CREATED).
+                        // CHECKS BODY RESPONSE
+                        body(
+                            TITLE, equalTo(TEST_TITLE),
+                            DESCRIPTION, equalTo(TEST_DESCRIPTION)
+                        ).
+                        extract().
+                        path(ID);
 
         return Integer.parseInt(id);
     }
@@ -111,7 +117,7 @@ public class ProjectsCrudTest {
         DocumentBuilder documentBuilder = factory.newDocumentBuilder();
 
         Document body = documentBuilder.newDocument();
-        Element root = body.createElement(PROJECT);
+        Element root = body.createElement(CATEGORY);
         body.appendChild(root);
 
         Element title = body.createElement(TITLE);
@@ -123,14 +129,6 @@ public class ProjectsCrudTest {
         description.appendChild(body.createTextNode(TEST_DESCRIPTION));
         root.appendChild(description);
 
-        Element active = body.createElement(ACTIVE);
-        active.appendChild(body.createTextNode(TRUE));
-        root.appendChild(active);
-
-        Element completed = body.createElement(COMPLETED);
-        completed.appendChild(body.createTextNode(FALSE));
-        root.appendChild(completed);
-
         Transformer transformer = (TransformerFactory.newInstance()).newTransformer();
         StringWriter writer = new StringWriter();
         transformer.transform(new DOMSource(body), new StreamResult(writer));
@@ -139,64 +137,18 @@ public class ProjectsCrudTest {
 
         given().
                 body(xmlBody).
+                // I GIVE XML
                 contentType(ContentType.XML).
+                // I EXPECT XML BACK
                 accept(ContentType.XML).
         when().
-                post(ALL_PROJECTS_PATH).
+                post(ALL_CATEGORIES_PATH).
         then().
                 contentType(ContentType.XML).
                 statusCode(HttpStatus.SC_CREATED).
                 body(
-                        PROJECT+"."+TITLE, equalTo(TEST_TITLE),
-                        PROJECT+"."+DESCRIPTION, equalTo(TEST_DESCRIPTION),
-                        PROJECT+"."+ACTIVE, equalTo(TRUE),
-                        PROJECT+"."+COMPLETED, equalTo(FALSE)
-                );
-    }
-
-    @Test
-    public void postCreatesWithoutActive(){
-
-        final HashMap<String, Object> givenBody = new HashMap<>();
-        givenBody.put(TITLE, TEST_TITLE);
-        givenBody.put(DESCRIPTION, TEST_DESCRIPTION);
-        givenBody.put(COMPLETED, false);
-
-        given().
-                body(givenBody).
-                when().
-                post(ALL_PROJECTS_PATH)
-                .then()
-                .contentType(ContentType.JSON)
-                .statusCode(HttpStatus.SC_CREATED)
-                .body(
-                        TITLE, equalTo(TEST_TITLE),
-                        DESCRIPTION, equalTo(TEST_DESCRIPTION),
-                        ACTIVE, equalTo(FALSE),
-                        COMPLETED, equalTo(FALSE)
-                );
-    }
-
-    @Test
-    public void postCreatesWithoutCompleted(){
-
-        final HashMap<String, Object> givenBody = new HashMap<>();
-        givenBody.put(TITLE, TEST_TITLE);
-        givenBody.put(DESCRIPTION, TEST_DESCRIPTION);
-        givenBody.put(ACTIVE, true);
-
-        given().
-                body(givenBody).
-                when().
-                post(ALL_PROJECTS_PATH)
-                .then()
-                .contentType(ContentType.JSON)
-                .statusCode(HttpStatus.SC_CREATED)
-                .body(
-                        TITLE, equalTo(TEST_TITLE),
-                        DESCRIPTION, equalTo(TEST_DESCRIPTION),
-                        ACTIVE, equalTo(TRUE),
-                        COMPLETED, equalTo(FALSE)
+                        CATEGORY+"."+TITLE, equalTo(TEST_TITLE),
+                        CATEGORY+"."+DESCRIPTION, equalTo(TEST_DESCRIPTION)
                 );
     }
 
@@ -205,21 +157,17 @@ public class ProjectsCrudTest {
 
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, TEST_TITLE);
-        givenBody.put(ACTIVE, true);
-        givenBody.put(COMPLETED, false);
 
         given().
                 body(givenBody).
                 when().
-                post(ALL_PROJECTS_PATH)
+                post(ALL_CATEGORIES_PATH)
                 .then()
                 .contentType(ContentType.JSON)
                 .statusCode(HttpStatus.SC_CREATED)
                 .body(
                         TITLE, equalTo(TEST_TITLE),
-                        DESCRIPTION, equalTo(EMPTY_STRING),
-                        ACTIVE, equalTo(TRUE),
-                        COMPLETED, equalTo(FALSE)
+                        DESCRIPTION, equalTo(EMPTY_STRING)
                 );
     }
 
@@ -229,21 +177,17 @@ public class ProjectsCrudTest {
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, SOME_INTEGER);
         givenBody.put(DESCRIPTION, TEST_DESCRIPTION);
-        givenBody.put(ACTIVE, true);
-        givenBody.put(COMPLETED, false);
 
         given().
                 body(givenBody).
                 when().
-                post(ALL_PROJECTS_PATH)
+                post(ALL_CATEGORIES_PATH)
                 .then()
                 .contentType(ContentType.JSON)
                 .statusCode(HttpStatus.SC_CREATED)
                 .body(
                         TITLE, equalTo(Double.toString(SOME_INTEGER)),
-                        DESCRIPTION, equalTo(TEST_DESCRIPTION),
-                        ACTIVE, equalTo(TRUE),
-                        COMPLETED, equalTo(FALSE)
+                        DESCRIPTION, equalTo(TEST_DESCRIPTION)
                 );
     }
 
@@ -253,21 +197,17 @@ public class ProjectsCrudTest {
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, SOME_BOOLEAN);
         givenBody.put(DESCRIPTION, TEST_DESCRIPTION);
-        givenBody.put(ACTIVE, true);
-        givenBody.put(COMPLETED, false);
 
         given().
                 body(givenBody).
                 when().
-                post(ALL_PROJECTS_PATH)
+                post(ALL_CATEGORIES_PATH)
                 .then()
                 .contentType(ContentType.JSON)
                 .statusCode(HttpStatus.SC_CREATED)
                 .body(
                         TITLE, equalTo(Boolean.toString(SOME_BOOLEAN)),
-                        DESCRIPTION, equalTo(TEST_DESCRIPTION),
-                        ACTIVE, equalTo(TRUE),
-                        COMPLETED, equalTo(FALSE)
+                        DESCRIPTION, equalTo(TEST_DESCRIPTION)
                 );
     }
 
@@ -277,21 +217,17 @@ public class ProjectsCrudTest {
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, TEST_TITLE);
         givenBody.put(DESCRIPTION, SOME_INTEGER);
-        givenBody.put(ACTIVE, true);
-        givenBody.put(COMPLETED, false);
 
         given().
                 body(givenBody).
                 when().
-                post(ALL_PROJECTS_PATH)
+                post(ALL_CATEGORIES_PATH)
                 .then()
                 .contentType(ContentType.JSON)
                 .statusCode(HttpStatus.SC_CREATED)
                 .body(
                         TITLE, equalTo(TEST_TITLE),
-                        DESCRIPTION, equalTo(Double.toString(SOME_INTEGER)),
-                        ACTIVE, equalTo(TRUE),
-                        COMPLETED, equalTo(FALSE)
+                        DESCRIPTION, equalTo(Double.toString(SOME_INTEGER))
                 );
     }
 
@@ -301,243 +237,117 @@ public class ProjectsCrudTest {
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, TEST_TITLE);
         givenBody.put(DESCRIPTION, SOME_BOOLEAN);
-        givenBody.put(ACTIVE, true);
-        givenBody.put(COMPLETED, false);
 
         given().
                 body(givenBody).
                 when().
-                post(ALL_PROJECTS_PATH)
+                post(ALL_CATEGORIES_PATH)
                 .then()
                 .contentType(ContentType.JSON)
                 .statusCode(HttpStatus.SC_CREATED)
                 .body(
                         TITLE, equalTo(TEST_TITLE),
-                        DESCRIPTION, equalTo(Boolean.toString(SOME_BOOLEAN)),
-                        ACTIVE, equalTo(TRUE),
-                        COMPLETED, equalTo(FALSE)
+                        DESCRIPTION, equalTo(Boolean.toString(SOME_BOOLEAN))
                 );
     }
 
     @Test
-    public void postRejectsIntegerActive(){
+    public void postWithMissingTitleDoesReject(){
+
         final HashMap<String, Object> givenBody = new HashMap<>();
-        givenBody.put(TITLE, TEST_TITLE);
         givenBody.put(DESCRIPTION, TEST_DESCRIPTION);
-        givenBody.put(ACTIVE, SOME_INTEGER);
-        givenBody.put(COMPLETED, false);
 
         given().
                 body(givenBody).
                 when().
-                post(ALL_PROJECTS_PATH)
+                post(ALL_CATEGORIES_PATH)
                 .then()
                 .contentType(ContentType.JSON)
-                .statusCode(HttpStatus.SC_BAD_REQUEST);
+                .statusCode(equalTo(HttpStatus.SC_BAD_REQUEST));
     }
 
     @Test
-    public void postRejectsIntegerCompleted(){
-        final HashMap<String, Object> givenBody = new HashMap<>();
-        givenBody.put(TITLE, TEST_TITLE);
-        givenBody.put(DESCRIPTION, TEST_DESCRIPTION);
-        givenBody.put(ACTIVE, true);
-        givenBody.put(COMPLETED, SOME_INTEGER);
-
-        given().
-                body(givenBody).
-                when().
-                post(ALL_PROJECTS_PATH)
-                .then()
-                .contentType(ContentType.JSON)
-                .statusCode(HttpStatus.SC_BAD_REQUEST);
-    }
-
-    // BUG - TITLE CAN BE MISSING
-    // CURRENT BEHAVIOUR
-    @Test
-    public void postWithMissingTitleReturnsEmptyTitle(){
-
-        final HashMap<String, Object> givenBody = new HashMap<>();
-        givenBody.put(DESCRIPTION, TEST_DESCRIPTION);
-        givenBody.put(ACTIVE, true);
-        givenBody.put(COMPLETED, false);
-
-        given().
-                body(givenBody).
-                when().
-                post(ALL_PROJECTS_PATH)
-                .then()
-                .contentType(ContentType.JSON)
-                .statusCode(HttpStatus.SC_CREATED)
-                .body(
-                        TITLE, equalTo(EMPTY_STRING),
-                        DESCRIPTION, equalTo(TEST_DESCRIPTION),
-                        ACTIVE, equalTo(TRUE),
-                        COMPLETED, equalTo(FALSE)
-                );
-    }
-
-    // DOES NOT HAVE EXPECTED BEHAVIOUR
-    @Test
-    public void postWithMissingTitleDoesNotReject(){
-
-        final HashMap<String, Object> givenBody = new HashMap<>();
-        givenBody.put(DESCRIPTION, TEST_DESCRIPTION);
-        givenBody.put(ACTIVE, true);
-        givenBody.put(COMPLETED, false);
-
-        given().
-                body(givenBody).
-                when().
-                post(ALL_PROJECTS_PATH)
-                .then()
-                .contentType(ContentType.JSON)
-                .statusCode(not(equalTo(HttpStatus.SC_BAD_REQUEST)));
-    }
-
-    // BUG - TITLE CAN BE EMPTY STRING
-    // CURRENT BEHAVIOUR
-    @Test
-    public void postWithEmptyTitleReturnsEmptyTitle(){
+    public void postWithEmptyTitleDoesReject(){
 
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, EMPTY_STRING);
         givenBody.put(DESCRIPTION, TEST_DESCRIPTION);
-        givenBody.put(ACTIVE, true);
-        givenBody.put(COMPLETED, false);
 
         given().
                 body(givenBody).
                 when().
-                post(ALL_PROJECTS_PATH)
+                post(ALL_CATEGORIES_PATH)
                 .then()
                 .contentType(ContentType.JSON)
-                .statusCode(HttpStatus.SC_CREATED)
-                .body(
-                        TITLE, equalTo(EMPTY_STRING),
-                        DESCRIPTION, equalTo(TEST_DESCRIPTION),
-                        ACTIVE, equalTo(TRUE),
-                        COMPLETED, equalTo(FALSE)
-                );
+                .statusCode(equalTo(HttpStatus.SC_BAD_REQUEST));
     }
 
-    // DOES NOT HAVE EXPECTED BEHAVIOUR
     @Test
-    public void postWithEmptyTitleDoesNotReject(){
-
-        final HashMap<String, Object> givenBody = new HashMap<>();
-        givenBody.put(TITLE, EMPTY_STRING);
-        givenBody.put(DESCRIPTION, TEST_DESCRIPTION);
-        givenBody.put(ACTIVE, true);
-        givenBody.put(COMPLETED, false);
-
-        given().
-                body(givenBody).
-                when().
-                post(ALL_PROJECTS_PATH)
-                .then()
-                .contentType(ContentType.JSON)
-                .statusCode(not(equalTo(HttpStatus.SC_BAD_REQUEST)));
-    }
-
-    // BUG - TITLE CAN BE WHITESPACE
-    // CURRENT BEHAVIOUR
-    @Test
-    public void postWithWhitespaceTitleReturnsEmptyTitle(){
+    public void postWithWhitespaceTitleDoesReject(){
 
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, WHITESPACE_STRING);
         givenBody.put(DESCRIPTION, TEST_DESCRIPTION);
-        givenBody.put(ACTIVE, true);
-        givenBody.put(COMPLETED, false);
 
         given().
                 body(givenBody).
                 when().
-                post(ALL_PROJECTS_PATH)
-                .then()
-                .contentType(ContentType.JSON)
-                .statusCode(HttpStatus.SC_CREATED)
-                .body(
-                        TITLE, equalTo(WHITESPACE_STRING),
-                        DESCRIPTION, equalTo(TEST_DESCRIPTION),
-                        ACTIVE, equalTo(TRUE),
-                        COMPLETED, equalTo(FALSE)
-                );
-    }
-
-    // DOES NOT HAVE EXPECTED BEHAVIOUR
-    @Test
-    public void postWithWhitespaceTitleDoesNotReject(){
-
-        final HashMap<String, Object> givenBody = new HashMap<>();
-        givenBody.put(TITLE, WHITESPACE_STRING);
-        givenBody.put(DESCRIPTION, TEST_DESCRIPTION);
-        givenBody.put(ACTIVE, true);
-        givenBody.put(COMPLETED, false);
-
-        given().
-                body(givenBody).
-                when().
-                post(ALL_PROJECTS_PATH).
+                post(ALL_CATEGORIES_PATH).
                 then().
                 contentType(ContentType.JSON).
-                statusCode(not(equalTo(HttpStatus.SC_BAD_REQUEST)));
+                statusCode(equalTo(HttpStatus.SC_BAD_REQUEST));
     }
 
     @Test
-    public void getProjectsReturnsAllProjects(){
+    public void getCategoriesReturnsAllCategories(){
         // Create Three Random projects
         postCreatesWithFullBody();
         postCreatesWithBooleanTitleConverted();
         postCreatesWithIntegerTitleConverted();
 
         List<Map<String, Object>> projects = when().
-                get(ALL_PROJECTS_PATH).
+                get(ALL_CATEGORIES_PATH).
                 then().
                 contentType(ContentType.JSON).
                 statusCode(HttpStatus.SC_OK).
                 extract().
                 body().
                 jsonPath().
-                getList(PROJECTS);
+                getList(CATEGORIES);
 
         Assertions.assertTrue(
                 projects.size() == 3 &&
-                projects.stream().allMatch(
-                        object -> object.get(TITLE).equals(TEST_TITLE) ||
-                                object.get(TITLE).equals(Double.toString(SOME_INTEGER)) ||
-                                object.get(TITLE).equals(Boolean.toString(SOME_BOOLEAN))
-                )
+                        projects.stream().allMatch(
+                                object -> object.get(TITLE).equals(TEST_TITLE) ||
+                                        object.get(TITLE).equals(Double.toString(SOME_INTEGER)) ||
+                                        object.get(TITLE).equals(Boolean.toString(SOME_BOOLEAN))
+                        )
         );
     }
 
     @Test
-    public void putProjectsNotAllowed(){
+    public void putCategoriesNotAllowed(){
 
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, TEST_TITLE);
         givenBody.put(DESCRIPTION, TEST_DESCRIPTION);
-        givenBody.put(ACTIVE, true);
-        givenBody.put(COMPLETED, false);
 
         given().
                 body(givenBody).
                 when().
-                put(ALL_PROJECTS_PATH)
+                put(ALL_CATEGORIES_PATH)
                 .then()
                 .statusCode(HttpStatus.SC_METHOD_NOT_ALLOWED);
     }
 
     @Test
-    public void putProjectsNotAllowedXML() throws ParserConfigurationException, TransformerException, TransformerConfigurationException {
+    public void putCategoriesNotAllowedXML() throws ParserConfigurationException, TransformerException, TransformerConfigurationException {
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder = factory.newDocumentBuilder();
 
         Document body = documentBuilder.newDocument();
-        Element root = body.createElement(PROJECT);
+        Element root = body.createElement(CATEGORY);
         body.appendChild(root);
 
         Element title = body.createElement(TITLE);
@@ -549,13 +359,6 @@ public class ProjectsCrudTest {
         description.appendChild(body.createTextNode(TEST_DESCRIPTION));
         root.appendChild(description);
 
-        Element active = body.createElement(ACTIVE);
-        active.appendChild(body.createTextNode(TRUE));
-        root.appendChild(active);
-
-        Element completed = body.createElement(COMPLETED);
-        completed.appendChild(body.createTextNode(FALSE));
-        root.appendChild(completed);
 
         Transformer transformer = (TransformerFactory.newInstance()).newTransformer();
         StringWriter writer = new StringWriter();
@@ -568,36 +371,34 @@ public class ProjectsCrudTest {
                 contentType(ContentType.XML).
                 accept(ContentType.XML).
                 when().
-                put(ALL_PROJECTS_PATH).
+                put(ALL_CATEGORIES_PATH).
                 then().
                 statusCode(HttpStatus.SC_METHOD_NOT_ALLOWED);
     }
 
     @Test
-    public void patchProjectsNotAllowed(){
+    public void patchCategoriesNotAllowed(){
 
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, TEST_TITLE);
         givenBody.put(DESCRIPTION, TEST_DESCRIPTION);
-        givenBody.put(ACTIVE, true);
-        givenBody.put(COMPLETED, false);
 
         given().
                 body(givenBody).
                 when().
-                patch(ALL_PROJECTS_PATH)
+                patch(ALL_CATEGORIES_PATH)
                 .then()
                 .statusCode(HttpStatus.SC_METHOD_NOT_ALLOWED);
     }
 
     @Test
-    public void patchProjectsNotAllowedXML() throws ParserConfigurationException, TransformerException, TransformerConfigurationException {
+    public void patchCategoriesNotAllowedXML() throws ParserConfigurationException, TransformerException, TransformerConfigurationException {
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder = factory.newDocumentBuilder();
 
         Document body = documentBuilder.newDocument();
-        Element root = body.createElement(PROJECT);
+        Element root = body.createElement(CATEGORY);
         body.appendChild(root);
 
         Element title = body.createElement(TITLE);
@@ -609,13 +410,6 @@ public class ProjectsCrudTest {
         description.appendChild(body.createTextNode(TEST_DESCRIPTION));
         root.appendChild(description);
 
-        Element active = body.createElement(ACTIVE);
-        active.appendChild(body.createTextNode(TRUE));
-        root.appendChild(active);
-
-        Element completed = body.createElement(COMPLETED);
-        completed.appendChild(body.createTextNode(FALSE));
-        root.appendChild(completed);
 
         Transformer transformer = (TransformerFactory.newInstance()).newTransformer();
         StringWriter writer = new StringWriter();
@@ -628,88 +422,84 @@ public class ProjectsCrudTest {
                 contentType(ContentType.XML).
                 accept(ContentType.XML).
                 when().
-                patch(ALL_PROJECTS_PATH).
+                patch(ALL_CATEGORIES_PATH).
                 then().
                 statusCode(HttpStatus.SC_METHOD_NOT_ALLOWED);
     }
 
     @Test
-    public void deleteProjectsNotAllowed(){
+    public void deleteCategoriesNotAllowed(){
         given().
                 contentType(ContentType.JSON).
                 accept(ContentType.JSON).
-        when().
-                delete(ALL_PROJECTS_PATH).
+                when().
+                delete(ALL_CATEGORIES_PATH).
                 then().
                 statusCode(HttpStatus.SC_METHOD_NOT_ALLOWED);
     }
 
     @Test
-    public void deleteProjectsNotAllowedXML(){
+    public void deleteCategoriesNotAllowedXML(){
         given().
                 contentType(ContentType.XML).
                 accept(ContentType.XML).
                 when().
-                delete(ALL_PROJECTS_PATH).
+                delete(ALL_CATEGORIES_PATH).
                 then().
                 statusCode(HttpStatus.SC_METHOD_NOT_ALLOWED);
     }
 
     @Test
-    public void getSpecificProjectReturnsBody() {
+    public void getSpecificCategoryReturnsBody() {
         int id = postCreatesWithFullBody();
 
         Map<String, Object> project = (Map<String, Object>)given().
                 pathParam(ID, id).
-        when().
-                get(SPECIFIC_PROJECT_PATH).
-        then().
+                when().
+                get(SPECIFIC_CATEGORIES_PATH).
+                then().
                 statusCode(HttpStatus.SC_OK).
                 contentType(ContentType.JSON).
                 extract().
                 body().
                 jsonPath().
-                getList(PROJECTS).
+                getList(CATEGORIES).
                 get(0);
 
         Assertions.assertTrue(
                 project.get(ID).equals(String.valueOf(id)) &&
-                project.get(TITLE).equals(TEST_TITLE) &&
-                project.get(DESCRIPTION).equals(TEST_DESCRIPTION) &&
-                project.get(ACTIVE).equals(TRUE) &&
-                project.get(COMPLETED).equals(FALSE)
+                        project.get(TITLE).equals(TEST_TITLE) &&
+                        project.get(DESCRIPTION).equals(TEST_DESCRIPTION)
         );
 
     }
 
     @Test
-    public void getSpecificProjectReturnsXMLBody() {
+    public void getSpecificCategoryReturnsXMLBody() {
         int id = postCreatesWithFullBody();
 
-                given().
-                    pathParam(ID, id).
-                    accept(ContentType.XML).
+        given().
+                pathParam(ID, id).
+                accept(ContentType.XML).
                 when().
-                    get(SPECIFIC_PROJECT_PATH).
+                get(SPECIFIC_CATEGORIES_PATH).
                 then().
-                    statusCode(HttpStatus.SC_OK).
-                    contentType(ContentType.XML).
-                    body(
-                            PROJECTS+"."+PROJECT+"."+TITLE, equalTo(TEST_TITLE),
-                            PROJECTS+"."+PROJECT+"."+DESCRIPTION, equalTo(TEST_DESCRIPTION),
-                            PROJECTS+"."+PROJECT+"."+ACTIVE, equalTo(TRUE),
-                            PROJECTS+"."+PROJECT+"."+COMPLETED, equalTo(FALSE)
-                    );
+                statusCode(HttpStatus.SC_OK).
+                contentType(ContentType.XML).
+                body(
+                        CATEGORIES+"."+CATEGORY+"."+TITLE, equalTo(TEST_TITLE),
+                        CATEGORIES+"."+CATEGORY+"."+DESCRIPTION, equalTo(TEST_DESCRIPTION)
+                );
 
     }
 
     @Test
-    public void getSpecificProjectReturnsNotFound() {
+    public void getSpecificCategoryReturnsNotFound() {
 
         given().
                 pathParam(ID, 10001).
                 when().
-                get(SPECIFIC_PROJECT_PATH).
+                get(SPECIFIC_CATEGORIES_PATH).
                 then().
                 statusCode(HttpStatus.SC_NOT_FOUND).
                 contentType(ContentType.JSON);
@@ -717,12 +507,12 @@ public class ProjectsCrudTest {
     }
 
     @Test
-    public void getSpecificProjectHandlesNonIntegerID() {
+    public void getSpecificCategoryHandlesNonIntegerID() {
 
         given().
                 pathParam(ID, "fdsafa").
                 when().
-                get(SPECIFIC_PROJECT_PATH).
+                get(SPECIFIC_CATEGORIES_PATH).
                 then().
                 statusCode(HttpStatus.SC_NOT_FOUND).
                 contentType(ContentType.JSON);
@@ -736,23 +526,19 @@ public class ProjectsCrudTest {
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, OTHER_TEST_TITLE);
         givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
-        givenBody.put(ACTIVE, false);
-        givenBody.put(COMPLETED, true);
 
         given().
                 pathParam(ID, id).
                 body(givenBody).
                 when().
-                put(SPECIFIC_PROJECT_PATH)
+                put(SPECIFIC_CATEGORIES_PATH)
                 .then()
                 .contentType(ContentType.JSON)
                 .statusCode(HttpStatus.SC_OK)
                 .body(
                         ID, equalTo(String.valueOf(id)),
                         TITLE, equalTo(OTHER_TEST_TITLE),
-                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION),
-                        ACTIVE, equalTo(FALSE),
-                        COMPLETED, equalTo(TRUE)
+                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION)
                 );
     }
 
@@ -764,7 +550,7 @@ public class ProjectsCrudTest {
         DocumentBuilder documentBuilder = factory.newDocumentBuilder();
 
         Document body = documentBuilder.newDocument();
-        Element root = body.createElement(PROJECT);
+        Element root = body.createElement(CATEGORY);
         body.appendChild(root);
 
         Element title = body.createElement(TITLE);
@@ -776,13 +562,6 @@ public class ProjectsCrudTest {
         description.appendChild(body.createTextNode(TEST_DESCRIPTION));
         root.appendChild(description);
 
-        Element active = body.createElement(ACTIVE);
-        active.appendChild(body.createTextNode(TRUE));
-        root.appendChild(active);
-
-        Element completed = body.createElement(COMPLETED);
-        completed.appendChild(body.createTextNode(FALSE));
-        root.appendChild(completed);
 
         Transformer transformer = (TransformerFactory.newInstance()).newTransformer();
         StringWriter writer = new StringWriter();
@@ -796,15 +575,13 @@ public class ProjectsCrudTest {
                 contentType(ContentType.XML).
                 accept(ContentType.XML).
                 when().
-                put(SPECIFIC_PROJECT_PATH).
+                put(SPECIFIC_CATEGORIES_PATH).
                 then().
                 contentType(ContentType.XML).
                 statusCode(HttpStatus.SC_OK).
                 body(
-                        PROJECT+"."+TITLE, equalTo(TEST_TITLE),
-                        PROJECT+"."+DESCRIPTION, equalTo(TEST_DESCRIPTION),
-                        PROJECT+"."+ACTIVE, equalTo(TRUE),
-                        PROJECT+"."+COMPLETED, equalTo(FALSE)
+                        CATEGORY+"."+TITLE, equalTo(TEST_TITLE),
+                        CATEGORY+"."+DESCRIPTION, equalTo(TEST_DESCRIPTION)
                 );
     }
 
@@ -815,23 +592,19 @@ public class ProjectsCrudTest {
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, SOME_INTEGER);
         givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
-        givenBody.put(ACTIVE, false);
-        givenBody.put(COMPLETED, true);
 
         given().
                 pathParam(ID, id).
                 body(givenBody).
                 when().
-                put(SPECIFIC_PROJECT_PATH)
+                put(SPECIFIC_CATEGORIES_PATH)
                 .then()
                 .contentType(ContentType.JSON)
                 .statusCode(HttpStatus.SC_OK)
                 .body(
                         ID, equalTo(String.valueOf(id)),
                         TITLE, equalTo(Double.toString(SOME_INTEGER)),
-                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION),
-                        ACTIVE, equalTo(FALSE),
-                        COMPLETED, equalTo(TRUE)
+                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION)
                 );
     }
 
@@ -842,23 +615,19 @@ public class ProjectsCrudTest {
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, SOME_BOOLEAN);
         givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
-        givenBody.put(ACTIVE, false);
-        givenBody.put(COMPLETED, true);
 
         given().
                 pathParam(ID, id).
                 body(givenBody).
                 when().
-                put(SPECIFIC_PROJECT_PATH)
+                put(SPECIFIC_CATEGORIES_PATH)
                 .then()
                 .contentType(ContentType.JSON)
                 .statusCode(HttpStatus.SC_OK)
                 .body(
                         ID, equalTo(String.valueOf(id)),
                         TITLE, equalTo(Boolean.toString(SOME_BOOLEAN)),
-                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION),
-                        ACTIVE, equalTo(FALSE),
-                        COMPLETED, equalTo(TRUE)
+                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION)
                 );
     }
 
@@ -869,23 +638,19 @@ public class ProjectsCrudTest {
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, TEST_TITLE);
         givenBody.put(DESCRIPTION, SOME_INTEGER);
-        givenBody.put(ACTIVE, false);
-        givenBody.put(COMPLETED, true);
 
         given().
                 pathParam(ID, id).
                 body(givenBody).
                 when().
-                put(SPECIFIC_PROJECT_PATH)
+                put(SPECIFIC_CATEGORIES_PATH)
                 .then()
                 .contentType(ContentType.JSON)
                 .statusCode(HttpStatus.SC_OK)
                 .body(
                         ID, equalTo(String.valueOf(id)),
                         TITLE, equalTo(TEST_TITLE),
-                        DESCRIPTION, equalTo(Double.toString(SOME_INTEGER)),
-                        ACTIVE, equalTo(FALSE),
-                        COMPLETED, equalTo(TRUE)
+                        DESCRIPTION, equalTo(Double.toString(SOME_INTEGER))
                 );
     }
 
@@ -896,23 +661,19 @@ public class ProjectsCrudTest {
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, TEST_TITLE);
         givenBody.put(DESCRIPTION, SOME_BOOLEAN);
-        givenBody.put(ACTIVE, false);
-        givenBody.put(COMPLETED, true);
 
         given().
                 pathParam(ID, id).
                 body(givenBody).
                 when().
-                put(SPECIFIC_PROJECT_PATH)
+                put(SPECIFIC_CATEGORIES_PATH)
                 .then()
                 .contentType(ContentType.JSON)
                 .statusCode(HttpStatus.SC_OK)
                 .body(
                         ID, equalTo(String.valueOf(id)),
                         TITLE, equalTo(TEST_TITLE),
-                        DESCRIPTION, equalTo(Boolean.toString(SOME_BOOLEAN)),
-                        ACTIVE, equalTo(FALSE),
-                        COMPLETED, equalTo(TRUE)
+                        DESCRIPTION, equalTo(Boolean.toString(SOME_BOOLEAN))
                 );
     }
 
@@ -922,23 +683,19 @@ public class ProjectsCrudTest {
 
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, OTHER_TEST_TITLE);
-        givenBody.put(ACTIVE, false);
-        givenBody.put(COMPLETED, true);
 
         given().
                 pathParam(ID, id).
                 body(givenBody).
                 when().
-                put(SPECIFIC_PROJECT_PATH)
+                put(SPECIFIC_CATEGORIES_PATH)
                 .then()
                 .contentType(ContentType.JSON)
                 .statusCode(HttpStatus.SC_OK)
                 .body(
                         ID, equalTo(String.valueOf(id)),
                         TITLE, equalTo(OTHER_TEST_TITLE),
-                        DESCRIPTION, equalTo(EMPTY_STRING),
-                        ACTIVE, equalTo(FALSE),
-                        COMPLETED, equalTo(TRUE)
+                        DESCRIPTION, equalTo(EMPTY_STRING)
                 );
     }
 
@@ -949,22 +706,19 @@ public class ProjectsCrudTest {
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, OTHER_TEST_TITLE);
         givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
-        givenBody.put(COMPLETED, true);
 
         given().
                 pathParam(ID, id).
                 body(givenBody).
                 when().
-                put(SPECIFIC_PROJECT_PATH)
+                put(SPECIFIC_CATEGORIES_PATH)
                 .then()
                 .contentType(ContentType.JSON)
                 .statusCode(HttpStatus.SC_OK)
                 .body(
                         ID, equalTo(String.valueOf(id)),
                         TITLE, equalTo(OTHER_TEST_TITLE),
-                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION),
-                        ACTIVE, equalTo(FALSE),
-                        COMPLETED, equalTo(TRUE)
+                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION)
                 );
     }
 
@@ -975,121 +729,55 @@ public class ProjectsCrudTest {
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, OTHER_TEST_TITLE);
         givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
-        givenBody.put(ACTIVE, false);
 
         given().
                 pathParam(ID, id).
                 body(givenBody).
                 when().
-                put(SPECIFIC_PROJECT_PATH)
+                put(SPECIFIC_CATEGORIES_PATH)
                 .then()
                 .contentType(ContentType.JSON)
                 .statusCode(HttpStatus.SC_OK)
                 .body(
                         ID, equalTo(String.valueOf(id)),
                         TITLE, equalTo(OTHER_TEST_TITLE),
-                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION),
-                        ACTIVE, equalTo(FALSE),
-                        COMPLETED, equalTo(FALSE)
+                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION)
                 );
     }
 
-    // BUG - TITLE CAN BE EMPTY
-    // CURRENT BEHAVIOUR
     @Test
-    public void putSpecificWithEmptyTitleReturnsEmptyTitle(){
+    public void putSpecificWithEmptyTitleDoesReject(){
         int id = postCreatesWithFullBody();
 
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
-        givenBody.put(COMPLETED, true);
-        givenBody.put(ACTIVE, false);
 
         given().
                 pathParam(ID, id).
                 body(givenBody).
                 when().
-                put(SPECIFIC_PROJECT_PATH)
+                put(SPECIFIC_CATEGORIES_PATH)
                 .then()
                 .contentType(ContentType.JSON)
-                .statusCode(HttpStatus.SC_OK)
-                .body(
-                        ID, equalTo(String.valueOf(id)),
-                        TITLE, equalTo(EMPTY_STRING),
-                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION),
-                        ACTIVE, equalTo(FALSE),
-                        COMPLETED, equalTo(TRUE)
-                );
+                .statusCode(equalTo(HttpStatus.SC_BAD_REQUEST));
     }
 
-    //DOES NOT HAVE EXPECTED BEHAVIOUR
     @Test
-    public void putSpecificWithEmptyTitleDoesNotReject(){
-        int id = postCreatesWithFullBody();
-
-        final HashMap<String, Object> givenBody = new HashMap<>();
-        givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
-        givenBody.put(COMPLETED, true);
-        givenBody.put(ACTIVE, false);
-
-        given().
-                pathParam(ID, id).
-                body(givenBody).
-                when().
-                put(SPECIFIC_PROJECT_PATH)
-                .then()
-                .contentType(ContentType.JSON)
-                .statusCode(not(equalTo(HttpStatus.SC_BAD_REQUEST)));
-    }
-
-    // BUG - TITLE CAN BE WHITESPACE
-    // CURRENT BEHAVIOUR
-    @Test
-    public void putSpecificWithWhitespaceTitleReturnsEmptyTitle(){
+    public void putSpecificWithWhitespaceTitleDoesReject(){
         int id = postCreatesWithFullBody();
 
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, WHITESPACE_STRING);
         givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
-        givenBody.put(COMPLETED, true);
-        givenBody.put(ACTIVE, false);
 
         given().
                 pathParam(ID, id).
                 body(givenBody).
                 when().
-                put(SPECIFIC_PROJECT_PATH)
+                put(SPECIFIC_CATEGORIES_PATH)
                 .then()
                 .contentType(ContentType.JSON)
-                .statusCode(HttpStatus.SC_OK)
-                .body(
-                        ID, equalTo(String.valueOf(id)),
-                        TITLE, equalTo(WHITESPACE_STRING),
-                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION),
-                        ACTIVE, equalTo(FALSE),
-                        COMPLETED, equalTo(TRUE)
-                );
-    }
-
-    //DOES NOT HAVE EXPECTED BEHAVIOUR
-    @Test
-    public void putSpecificWithWhitespaceTitleDoesNotReject(){
-        int id = postCreatesWithFullBody();
-
-        final HashMap<String, Object> givenBody = new HashMap<>();
-        givenBody.put(TITLE, WHITESPACE_STRING);
-        givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
-        givenBody.put(COMPLETED, true);
-        givenBody.put(ACTIVE, false);
-
-        given().
-                pathParam(ID, id).
-                body(givenBody).
-                when().
-                put(SPECIFIC_PROJECT_PATH)
-                .then()
-                .contentType(ContentType.JSON)
-                .statusCode(not(equalTo(HttpStatus.SC_BAD_REQUEST)));
+                .statusCode(equalTo(HttpStatus.SC_BAD_REQUEST));
     }
 
     @Test
@@ -1099,23 +787,19 @@ public class ProjectsCrudTest {
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, OTHER_TEST_TITLE);
         givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
-        givenBody.put(ACTIVE, false);
-        givenBody.put(COMPLETED, true);
 
         given().
                 pathParam(ID, id).
                 body(givenBody).
                 when().
-                post(SPECIFIC_PROJECT_PATH)
+                post(SPECIFIC_CATEGORIES_PATH)
                 .then()
                 .contentType(ContentType.JSON)
                 .statusCode(HttpStatus.SC_OK)
                 .body(
                         ID, equalTo(String.valueOf(id)),
                         TITLE, equalTo(OTHER_TEST_TITLE),
-                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION),
-                        ACTIVE, equalTo(FALSE),
-                        COMPLETED, equalTo(TRUE)
+                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION)
                 );
     }
 
@@ -1127,7 +811,7 @@ public class ProjectsCrudTest {
         DocumentBuilder documentBuilder = factory.newDocumentBuilder();
 
         Document body = documentBuilder.newDocument();
-        Element root = body.createElement(PROJECT);
+        Element root = body.createElement(CATEGORY);
         body.appendChild(root);
 
         Element title = body.createElement(TITLE);
@@ -1139,13 +823,6 @@ public class ProjectsCrudTest {
         description.appendChild(body.createTextNode(TEST_DESCRIPTION));
         root.appendChild(description);
 
-        Element active = body.createElement(ACTIVE);
-        active.appendChild(body.createTextNode(TRUE));
-        root.appendChild(active);
-
-        Element completed = body.createElement(COMPLETED);
-        completed.appendChild(body.createTextNode(FALSE));
-        root.appendChild(completed);
 
         Transformer transformer = (TransformerFactory.newInstance()).newTransformer();
         StringWriter writer = new StringWriter();
@@ -1159,15 +836,13 @@ public class ProjectsCrudTest {
                 contentType(ContentType.XML).
                 accept(ContentType.XML).
                 when().
-                post(SPECIFIC_PROJECT_PATH).
+                post(SPECIFIC_CATEGORIES_PATH).
                 then().
                 contentType(ContentType.XML).
                 statusCode(HttpStatus.SC_OK).
                 body(
-                        PROJECT+"."+TITLE, equalTo(TEST_TITLE),
-                        PROJECT+"."+DESCRIPTION, equalTo(TEST_DESCRIPTION),
-                        PROJECT+"."+ACTIVE, equalTo(TRUE),
-                        PROJECT+"."+COMPLETED, equalTo(FALSE)
+                        CATEGORY+"."+TITLE, equalTo(TEST_TITLE),
+                        CATEGORY+"."+DESCRIPTION, equalTo(TEST_DESCRIPTION)
                 );
     }
 
@@ -1178,23 +853,19 @@ public class ProjectsCrudTest {
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, SOME_INTEGER);
         givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
-        givenBody.put(ACTIVE, false);
-        givenBody.put(COMPLETED, true);
 
         given().
                 pathParam(ID, id).
                 body(givenBody).
                 when().
-                post(SPECIFIC_PROJECT_PATH)
+                post(SPECIFIC_CATEGORIES_PATH)
                 .then()
                 .contentType(ContentType.JSON)
                 .statusCode(HttpStatus.SC_OK)
                 .body(
                         ID, equalTo(String.valueOf(id)),
                         TITLE, equalTo(Double.toString(SOME_INTEGER)),
-                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION),
-                        ACTIVE, equalTo(FALSE),
-                        COMPLETED, equalTo(TRUE)
+                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION)
                 );
     }
 
@@ -1205,23 +876,19 @@ public class ProjectsCrudTest {
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, SOME_BOOLEAN);
         givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
-        givenBody.put(ACTIVE, false);
-        givenBody.put(COMPLETED, true);
 
         given().
                 pathParam(ID, id).
                 body(givenBody).
                 when().
-                post(SPECIFIC_PROJECT_PATH)
+                post(SPECIFIC_CATEGORIES_PATH)
                 .then()
                 .contentType(ContentType.JSON)
                 .statusCode(HttpStatus.SC_OK)
                 .body(
                         ID, equalTo(String.valueOf(id)),
                         TITLE, equalTo(Boolean.toString(SOME_BOOLEAN)),
-                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION),
-                        ACTIVE, equalTo(FALSE),
-                        COMPLETED, equalTo(TRUE)
+                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION)
                 );
     }
 
@@ -1231,23 +898,19 @@ public class ProjectsCrudTest {
 
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
-        givenBody.put(ACTIVE, false);
-        givenBody.put(COMPLETED, true);
 
         given().
                 pathParam(ID, id).
                 body(givenBody).
                 when().
-                post(SPECIFIC_PROJECT_PATH)
+                post(SPECIFIC_CATEGORIES_PATH)
                 .then()
                 .contentType(ContentType.JSON)
                 .statusCode(HttpStatus.SC_OK)
                 .body(
                         ID, equalTo(String.valueOf(id)),
                         TITLE, equalTo(TEST_TITLE),
-                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION),
-                        ACTIVE, equalTo(FALSE),
-                        COMPLETED, equalTo(TRUE)
+                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION)
                 );
     }
 
@@ -1257,76 +920,19 @@ public class ProjectsCrudTest {
 
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, OTHER_TEST_TITLE);
-        givenBody.put(ACTIVE, false);
-        givenBody.put(COMPLETED, true);
 
         given().
                 pathParam(ID, id).
                 body(givenBody).
                 when().
-                post(SPECIFIC_PROJECT_PATH)
+                post(SPECIFIC_CATEGORIES_PATH)
                 .then()
                 .contentType(ContentType.JSON)
                 .statusCode(HttpStatus.SC_OK)
                 .body(
                         ID, equalTo(String.valueOf(id)),
                         TITLE, equalTo(OTHER_TEST_TITLE),
-                        DESCRIPTION, equalTo(TEST_DESCRIPTION),
-                        ACTIVE, equalTo(FALSE),
-                        COMPLETED, equalTo(TRUE)
-                );
-    }
-
-    @Test
-    public void postSpecificUpdatesWithoutActive(){
-        int id = postCreatesWithFullBody();
-
-        final HashMap<String, Object> givenBody = new HashMap<>();
-        givenBody.put(TITLE, OTHER_TEST_TITLE);
-        givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
-        givenBody.put(COMPLETED, true);
-
-        given().
-                pathParam(ID, id).
-                body(givenBody).
-                when().
-                post(SPECIFIC_PROJECT_PATH)
-                .then()
-                .contentType(ContentType.JSON)
-                .statusCode(HttpStatus.SC_OK)
-                .body(
-                        ID, equalTo(String.valueOf(id)),
-                        ID, equalTo(String.valueOf(id)),
-                        TITLE, equalTo(OTHER_TEST_TITLE),
-                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION),
-                        ACTIVE, equalTo(TRUE),
-                        COMPLETED, equalTo(TRUE)
-                );
-    }
-
-    @Test
-    public void postSpecificUpdatesWithoutCompleted(){
-        int id = postCreatesWithFullBody();
-
-        final HashMap<String, Object> givenBody = new HashMap<>();
-        givenBody.put(TITLE, OTHER_TEST_TITLE);
-        givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
-        givenBody.put(ACTIVE, false);
-
-        given().
-                pathParam(ID, id).
-                body(givenBody).
-                when().
-            post(SPECIFIC_PROJECT_PATH)
-                .then()
-                .contentType(ContentType.JSON)
-                .statusCode(HttpStatus.SC_OK)
-                .body(
-                        ID, equalTo(String.valueOf(id)),
-                        TITLE, equalTo(OTHER_TEST_TITLE),
-                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION),
-                        ACTIVE, equalTo(FALSE),
-                        COMPLETED, equalTo(FALSE)
+                        DESCRIPTION, equalTo(TEST_DESCRIPTION)
                 );
     }
 
@@ -1337,23 +943,19 @@ public class ProjectsCrudTest {
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, TEST_TITLE);
         givenBody.put(DESCRIPTION, SOME_INTEGER);
-        givenBody.put(ACTIVE, false);
-        givenBody.put(COMPLETED, true);
 
         given().
                 pathParam(ID, id).
                 body(givenBody).
                 when().
-                post(SPECIFIC_PROJECT_PATH)
+                post(SPECIFIC_CATEGORIES_PATH)
                 .then()
                 .contentType(ContentType.JSON)
                 .statusCode(HttpStatus.SC_OK)
                 .body(
                         ID, equalTo(String.valueOf(id)),
                         TITLE, equalTo(TEST_TITLE),
-                        DESCRIPTION, equalTo(Double.toString(SOME_INTEGER)),
-                        ACTIVE, equalTo(FALSE),
-                        COMPLETED, equalTo(TRUE)
+                        DESCRIPTION, equalTo(Double.toString(SOME_INTEGER))
                 );
     }
 
@@ -1364,23 +966,19 @@ public class ProjectsCrudTest {
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, TEST_TITLE);
         givenBody.put(DESCRIPTION, SOME_BOOLEAN);
-        givenBody.put(ACTIVE, false);
-        givenBody.put(COMPLETED, true);
 
         given().
                 pathParam(ID, id).
                 body(givenBody).
                 when().
-                post(SPECIFIC_PROJECT_PATH)
+                post(SPECIFIC_CATEGORIES_PATH)
                 .then()
                 .contentType(ContentType.JSON)
                 .statusCode(HttpStatus.SC_OK)
                 .body(
                         ID, equalTo(String.valueOf(id)),
                         TITLE, equalTo(TEST_TITLE),
-                        DESCRIPTION, equalTo(Boolean.toString(SOME_BOOLEAN)),
-                        ACTIVE, equalTo(FALSE),
-                        COMPLETED, equalTo(TRUE)
+                        DESCRIPTION, equalTo(Boolean.toString(SOME_BOOLEAN))
                 );
     }
 
@@ -1390,107 +988,71 @@ public class ProjectsCrudTest {
 
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
-        givenBody.put(COMPLETED, true);
-        givenBody.put(ACTIVE, false);
 
         given().
                 pathParam(ID, id).
                 body(givenBody).
                 when().
-                post(SPECIFIC_PROJECT_PATH)
+                post(SPECIFIC_CATEGORIES_PATH)
                 .then()
                 .contentType(ContentType.JSON)
                 .statusCode(HttpStatus.SC_OK)
                 .body(
                         ID, equalTo(String.valueOf(id)),
                         TITLE, equalTo(TEST_TITLE),
-                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION),
-                        ACTIVE, equalTo(FALSE),
-                        COMPLETED, equalTo(TRUE)
+                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION)
                 );
     }
 
-    // BUG - TITLE CAN BE WHITESPACE
-    // CURRENT BEHAVIOUR
     @Test
-    public void postSpecificWithWhitespaceTitleReturnsEmptyTitle(){
+    public void postSpecificWithWhitespaceTitleDoesReject(){
         int id = postCreatesWithFullBody();
 
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, WHITESPACE_STRING);
         givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
-        givenBody.put(COMPLETED, true);
-        givenBody.put(ACTIVE, false);
 
         given().
                 pathParam(ID, id).
                 body(givenBody).
                 when().
-                post(SPECIFIC_PROJECT_PATH)
+                post(SPECIFIC_CATEGORIES_PATH)
                 .then()
                 .contentType(ContentType.JSON)
-                .statusCode(HttpStatus.SC_OK)
-                .body(
-                        ID, equalTo(String.valueOf(id)),
-                        TITLE, equalTo(WHITESPACE_STRING),
-                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION),
-                        ACTIVE, equalTo(FALSE),
-                        COMPLETED, equalTo(TRUE)
-                );
-    }
-
-    //DOES NOT HAVE EXPECTED BEHAVIOUR
-    @Test
-    public void postSpecificWithWhitespaceTitleDoesNotReject(){
-        int id = postCreatesWithFullBody();
-
-        final HashMap<String, Object> givenBody = new HashMap<>();
-        givenBody.put(TITLE, WHITESPACE_STRING);
-        givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
-        givenBody.put(COMPLETED, true);
-        givenBody.put(ACTIVE, false);
-
-        given().
-                pathParam(ID, id).
-                body(givenBody).
-                when().
-                post(SPECIFIC_PROJECT_PATH)
-                .then()
-                .contentType(ContentType.JSON)
-                .statusCode(not(equalTo(HttpStatus.SC_BAD_REQUEST)));
+                .statusCode(equalTo(HttpStatus.SC_BAD_REQUEST));
     }
 
     @Test
-    public void deleteSpecificDeletesProject(){
+    public void deleteSpecificDeletesCategory(){
         int id = postCreatesWithFullBody();
 
         List<Map<String, Object>> projectsBefore = when().
-                get(ALL_PROJECTS_PATH).
+                get(ALL_CATEGORIES_PATH).
                 then().
                 contentType(ContentType.JSON).
                 statusCode(HttpStatus.SC_OK).
                 extract().
                 body().
                 jsonPath().
-                getList(PROJECTS);
+                getList(CATEGORIES);
 
         given().
                 pathParam(ID, id).
                 when().
-                delete(SPECIFIC_PROJECT_PATH)
+                delete(SPECIFIC_CATEGORIES_PATH)
                 .then()
                 .contentType(ContentType.JSON)
                 .statusCode(HttpStatus.SC_OK);
 
         List<Map<String, Object>> projectsAfter = when().
-                get(ALL_PROJECTS_PATH).
+                get(ALL_CATEGORIES_PATH).
                 then().
                 contentType(ContentType.JSON).
                 statusCode(HttpStatus.SC_OK).
                 extract().
                 body().
                 jsonPath().
-                getList(PROJECTS);
+                getList(CATEGORIES);
 
         Assertions.assertTrue(
                 projectsAfter.size() == projectsBefore.size() -1 &&
@@ -1501,38 +1063,38 @@ public class ProjectsCrudTest {
     }
 
     @Test
-    public void deleteSpecificDeletesProjectXML(){
+    public void deleteSpecificDeletesCategoryXML(){
         int id = postCreatesWithFullBody();
 
         List<Map<String, Object>> projectsBefore = when().
-                get(ALL_PROJECTS_PATH).
+                get(ALL_CATEGORIES_PATH).
                 then().
                 contentType(ContentType.JSON).
                 statusCode(HttpStatus.SC_OK).
                 extract().
                 body().
                 jsonPath().
-                getList(PROJECTS);
+                getList(CATEGORIES);
 
         given().
                 pathParam(ID, id).
                 contentType(ContentType.XML).
                 accept(ContentType.XML).
                 when().
-                delete(SPECIFIC_PROJECT_PATH)
+                delete(SPECIFIC_CATEGORIES_PATH)
                 .then()
                 .contentType(ContentType.XML)
                 .statusCode(HttpStatus.SC_OK);
 
         List<Map<String, Object>> projectsAfter = when().
-                get(ALL_PROJECTS_PATH).
+                get(ALL_CATEGORIES_PATH).
                 then().
                 contentType(ContentType.JSON).
                 statusCode(HttpStatus.SC_OK).
                 extract().
                 body().
                 jsonPath().
-                getList(PROJECTS);
+                getList(CATEGORIES);
 
         Assertions.assertTrue(
                 projectsAfter.size() == projectsBefore.size() -1 &&
@@ -1547,19 +1109,19 @@ public class ProjectsCrudTest {
         int id = postCreatesWithFullBody();
 
         List<Map<String, Object>> projectsBefore = when().
-                get(ALL_PROJECTS_PATH).
+                get(ALL_CATEGORIES_PATH).
                 then().
                 contentType(ContentType.JSON).
                 statusCode(HttpStatus.SC_OK).
                 extract().
                 body().
                 jsonPath().
-                getList(PROJECTS);
+                getList(CATEGORIES);
 
         given().
                 pathParam(ID, id).
                 when().
-                delete(SPECIFIC_PROJECT_PATH)
+                delete(SPECIFIC_CATEGORIES_PATH)
                 .then()
                 .contentType(ContentType.JSON)
                 .statusCode(HttpStatus.SC_OK);
@@ -1567,7 +1129,7 @@ public class ProjectsCrudTest {
         given().
                 pathParam(ID, id).
                 when().
-                delete(SPECIFIC_PROJECT_PATH)
+                delete(SPECIFIC_CATEGORIES_PATH)
                 .then()
                 .contentType(ContentType.JSON)
                 .statusCode(HttpStatus.SC_NOT_FOUND);
@@ -1578,7 +1140,7 @@ public class ProjectsCrudTest {
         given().
                 pathParam(ID, 10001).
                 when().
-                delete(SPECIFIC_PROJECT_PATH)
+                delete(SPECIFIC_CATEGORIES_PATH)
                 .then()
                 .contentType(ContentType.JSON)
                 .statusCode(HttpStatus.SC_NOT_FOUND);
@@ -1589,7 +1151,7 @@ public class ProjectsCrudTest {
         given().
                 pathParam(ID, "asefsadfa").
                 when().
-                delete(SPECIFIC_PROJECT_PATH)
+                delete(SPECIFIC_CATEGORIES_PATH)
                 .then()
                 .contentType(ContentType.JSON)
                 .statusCode(HttpStatus.SC_NOT_FOUND);
@@ -1602,14 +1164,12 @@ public class ProjectsCrudTest {
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, OTHER_TEST_TITLE);
         givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
-        givenBody.put(ACTIVE, false);
-        givenBody.put(COMPLETED, true);
 
         given().
                 pathParam(ID, id).
                 body(givenBody).
                 when().
-                patch(SPECIFIC_PROJECT_PATH).
+                patch(SPECIFIC_CATEGORIES_PATH).
                 then().
                 statusCode(HttpStatus.SC_METHOD_NOT_ALLOWED);
     }
@@ -1622,7 +1182,7 @@ public class ProjectsCrudTest {
         DocumentBuilder documentBuilder = factory.newDocumentBuilder();
 
         Document body = documentBuilder.newDocument();
-        Element root = body.createElement(PROJECT);
+        Element root = body.createElement(CATEGORY);
         body.appendChild(root);
 
         Element title = body.createElement(TITLE);
@@ -1634,13 +1194,6 @@ public class ProjectsCrudTest {
         description.appendChild(body.createTextNode(TEST_DESCRIPTION));
         root.appendChild(description);
 
-        Element active = body.createElement(ACTIVE);
-        active.appendChild(body.createTextNode(TRUE));
-        root.appendChild(active);
-
-        Element completed = body.createElement(COMPLETED);
-        completed.appendChild(body.createTextNode(FALSE));
-        root.appendChild(completed);
 
         Transformer transformer = (TransformerFactory.newInstance()).newTransformer();
         StringWriter writer = new StringWriter();
@@ -1654,8 +1207,10 @@ public class ProjectsCrudTest {
                 contentType(ContentType.XML).
                 accept(ContentType.XML).
                 when().
-                patch(SPECIFIC_PROJECT_PATH).
+                patch(SPECIFIC_CATEGORIES_PATH).
                 then().
                 statusCode(HttpStatus.SC_METHOD_NOT_ALLOWED);
     }
+
 }
+
