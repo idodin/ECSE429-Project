@@ -41,10 +41,10 @@ public class CategoriesCrudTest {
     private static final String DESCRIPTION = "description";
 
     // Test Fields
-    private static final String TEST_TITLE = "Some project title";
-    private static final String TEST_DESCRIPTION = "Some project description";
-    private static final String OTHER_TEST_TITLE = "Some other project title";
-    private static final String OTHER_TEST_DESCRIPTION = "Some other project description";
+    private static final String TEST_TITLE = "Some category title";
+    private static final String TEST_DESCRIPTION = "Some category description";
+    private static final String OTHER_TEST_TITLE = "Some other category title";
+    private static final String OTHER_TEST_DESCRIPTION = "Some other category description";
 
     // Useful Constants
     private static final String EMPTY_STRING = "";
