@@ -8,7 +8,19 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +34,7 @@ public class ProjectsCrudTest {
     private static final String SPECIFIC_PROJECT_PATH = "/projects/{id}";
     private static final String CLEAR_PATH = "/admin/data/thingifier";
     private static final String PROJECTS = "projects";
+    private static final String PROJECT = "project";
 
     // Project Fields
     private static final String ID = "id";
@@ -41,6 +54,7 @@ public class ProjectsCrudTest {
     private static final String WHITESPACE_STRING = " ";
     private static final String TRUE = "true";
     private static final String FALSE = "false";
+    private static final String NULL = "null";
     private static final int SOME_INTEGER = 1;
     private static final boolean SOME_BOOLEAN = true;
 
@@ -88,6 +102,56 @@ public class ProjectsCrudTest {
                 .path(ID);
 
         return Integer.parseInt(id);
+    }
+
+    @Test
+    public void postCreatesWithXML() throws ParserConfigurationException, TransformerException, TransformerConfigurationException {
+
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder documentBuilder = factory.newDocumentBuilder();
+
+        Document body = documentBuilder.newDocument();
+        Element root = body.createElement(PROJECT);
+        body.appendChild(root);
+
+        Element title = body.createElement(TITLE);
+        title.appendChild(body.createTextNode(TEST_TITLE));
+        root.appendChild(title);
+
+
+        Element description = body.createElement(DESCRIPTION);
+        description.appendChild(body.createTextNode(TEST_DESCRIPTION));
+        root.appendChild(description);
+
+        Element active = body.createElement(ACTIVE);
+        active.appendChild(body.createTextNode(TRUE));
+        root.appendChild(active);
+
+        Element completed = body.createElement(COMPLETED);
+        completed.appendChild(body.createTextNode(FALSE));
+        root.appendChild(completed);
+
+        Transformer transformer = (TransformerFactory.newInstance()).newTransformer();
+        StringWriter writer = new StringWriter();
+        transformer.transform(new DOMSource(body), new StreamResult(writer));
+
+        String xmlBody = writer.getBuffer().toString();
+
+        given().
+                body(xmlBody).
+                contentType(ContentType.XML).
+                accept(ContentType.XML).
+        when().
+                post(ALL_PROJECTS_PATH).
+        then().
+                contentType(ContentType.XML).
+                statusCode(HttpStatus.SC_CREATED).
+                body(
+                        PROJECT+"."+TITLE, equalTo(TEST_TITLE),
+                        PROJECT+"."+DESCRIPTION, equalTo(TEST_DESCRIPTION),
+                        PROJECT+"."+ACTIVE, equalTo(TRUE),
+                        PROJECT+"."+COMPLETED, equalTo(FALSE)
+                );
     }
 
     @Test
@@ -467,6 +531,49 @@ public class ProjectsCrudTest {
     }
 
     @Test
+    public void putProjectsNotAllowedXML() throws ParserConfigurationException, TransformerException, TransformerConfigurationException {
+
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder documentBuilder = factory.newDocumentBuilder();
+
+        Document body = documentBuilder.newDocument();
+        Element root = body.createElement(PROJECT);
+        body.appendChild(root);
+
+        Element title = body.createElement(TITLE);
+        title.appendChild(body.createTextNode(TEST_TITLE));
+        root.appendChild(title);
+
+
+        Element description = body.createElement(DESCRIPTION);
+        description.appendChild(body.createTextNode(TEST_DESCRIPTION));
+        root.appendChild(description);
+
+        Element active = body.createElement(ACTIVE);
+        active.appendChild(body.createTextNode(TRUE));
+        root.appendChild(active);
+
+        Element completed = body.createElement(COMPLETED);
+        completed.appendChild(body.createTextNode(FALSE));
+        root.appendChild(completed);
+
+        Transformer transformer = (TransformerFactory.newInstance()).newTransformer();
+        StringWriter writer = new StringWriter();
+        transformer.transform(new DOMSource(body), new StreamResult(writer));
+
+        String xmlBody = writer.getBuffer().toString();
+
+        given().
+                body(xmlBody).
+                contentType(ContentType.XML).
+                accept(ContentType.XML).
+                when().
+                put(ALL_PROJECTS_PATH).
+                then().
+                statusCode(HttpStatus.SC_METHOD_NOT_ALLOWED);
+    }
+
+    @Test
     public void patchProjectsNotAllowed(){
 
         final HashMap<String, Object> givenBody = new HashMap<>();
@@ -484,9 +591,66 @@ public class ProjectsCrudTest {
     }
 
     @Test
-    public void deleteProjectsNotAllowed(){
-        when().
+    public void patchProjectsNotAllowedXML() throws ParserConfigurationException, TransformerException, TransformerConfigurationException {
+
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder documentBuilder = factory.newDocumentBuilder();
+
+        Document body = documentBuilder.newDocument();
+        Element root = body.createElement(PROJECT);
+        body.appendChild(root);
+
+        Element title = body.createElement(TITLE);
+        title.appendChild(body.createTextNode(TEST_TITLE));
+        root.appendChild(title);
+
+
+        Element description = body.createElement(DESCRIPTION);
+        description.appendChild(body.createTextNode(TEST_DESCRIPTION));
+        root.appendChild(description);
+
+        Element active = body.createElement(ACTIVE);
+        active.appendChild(body.createTextNode(TRUE));
+        root.appendChild(active);
+
+        Element completed = body.createElement(COMPLETED);
+        completed.appendChild(body.createTextNode(FALSE));
+        root.appendChild(completed);
+
+        Transformer transformer = (TransformerFactory.newInstance()).newTransformer();
+        StringWriter writer = new StringWriter();
+        transformer.transform(new DOMSource(body), new StreamResult(writer));
+
+        String xmlBody = writer.getBuffer().toString();
+
+        given().
+                body(xmlBody).
+                contentType(ContentType.XML).
+                accept(ContentType.XML).
+                when().
                 patch(ALL_PROJECTS_PATH).
+                then().
+                statusCode(HttpStatus.SC_METHOD_NOT_ALLOWED);
+    }
+
+    @Test
+    public void deleteProjectsNotAllowed(){
+        given().
+                contentType(ContentType.JSON).
+                accept(ContentType.JSON).
+        when().
+                delete(ALL_PROJECTS_PATH).
+                then().
+                statusCode(HttpStatus.SC_METHOD_NOT_ALLOWED);
+    }
+
+    @Test
+    public void deleteProjectsNotAllowedXML(){
+        given().
+                contentType(ContentType.XML).
+                accept(ContentType.XML).
+                when().
+                delete(ALL_PROJECTS_PATH).
                 then().
                 statusCode(HttpStatus.SC_METHOD_NOT_ALLOWED);
     }
@@ -515,6 +679,27 @@ public class ProjectsCrudTest {
                 project.get(ACTIVE).equals(TRUE) &&
                 project.get(COMPLETED).equals(FALSE)
         );
+
+    }
+
+    @Test
+    public void getSpecificProjectReturnsXMLBody() {
+        int id = postCreatesWithFullBody();
+
+                given().
+                    pathParam(ID, id).
+                    accept(ContentType.XML).
+                when().
+                    get(SPECIFIC_PROJECT_PATH).
+                then().
+                    statusCode(HttpStatus.SC_OK).
+                    contentType(ContentType.XML).
+                    body(
+                            PROJECTS+"."+PROJECT+"."+TITLE, equalTo(TEST_TITLE),
+                            PROJECTS+"."+PROJECT+"."+DESCRIPTION, equalTo(TEST_DESCRIPTION),
+                            PROJECTS+"."+PROJECT+"."+ACTIVE, equalTo(TRUE),
+                            PROJECTS+"."+PROJECT+"."+COMPLETED, equalTo(FALSE)
+                    );
 
     }
 
@@ -568,6 +753,58 @@ public class ProjectsCrudTest {
                         DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION),
                         ACTIVE, equalTo(FALSE),
                         COMPLETED, equalTo(TRUE)
+                );
+    }
+
+    @Test
+    public void putSpecificCreatesWithXML() throws ParserConfigurationException, TransformerException, TransformerConfigurationException {
+        int id = postCreatesWithFullBody();
+
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder documentBuilder = factory.newDocumentBuilder();
+
+        Document body = documentBuilder.newDocument();
+        Element root = body.createElement(PROJECT);
+        body.appendChild(root);
+
+        Element title = body.createElement(TITLE);
+        title.appendChild(body.createTextNode(TEST_TITLE));
+        root.appendChild(title);
+
+
+        Element description = body.createElement(DESCRIPTION);
+        description.appendChild(body.createTextNode(TEST_DESCRIPTION));
+        root.appendChild(description);
+
+        Element active = body.createElement(ACTIVE);
+        active.appendChild(body.createTextNode(TRUE));
+        root.appendChild(active);
+
+        Element completed = body.createElement(COMPLETED);
+        completed.appendChild(body.createTextNode(FALSE));
+        root.appendChild(completed);
+
+        Transformer transformer = (TransformerFactory.newInstance()).newTransformer();
+        StringWriter writer = new StringWriter();
+        transformer.transform(new DOMSource(body), new StreamResult(writer));
+
+        String xmlBody = writer.getBuffer().toString();
+
+        given().
+                pathParam(ID, id).
+                body(xmlBody).
+                contentType(ContentType.XML).
+                accept(ContentType.XML).
+                when().
+                put(SPECIFIC_PROJECT_PATH).
+                then().
+                contentType(ContentType.XML).
+                statusCode(HttpStatus.SC_OK).
+                body(
+                        PROJECT+"."+TITLE, equalTo(TEST_TITLE),
+                        PROJECT+"."+DESCRIPTION, equalTo(TEST_DESCRIPTION),
+                        PROJECT+"."+ACTIVE, equalTo(TRUE),
+                        PROJECT+"."+COMPLETED, equalTo(FALSE)
                 );
     }
 
@@ -626,6 +863,60 @@ public class ProjectsCrudTest {
     }
 
     @Test
+    public void putSpecificUpdatesWithIntegerDescriptionConverted(){
+        int id = postCreatesWithFullBody();
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(TITLE, TEST_TITLE);
+        givenBody.put(DESCRIPTION, SOME_INTEGER);
+        givenBody.put(ACTIVE, false);
+        givenBody.put(COMPLETED, true);
+
+        given().
+                pathParam(ID, id).
+                body(givenBody).
+                when().
+                put(SPECIFIC_PROJECT_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(HttpStatus.SC_OK)
+                .body(
+                        ID, equalTo(String.valueOf(id)),
+                        TITLE, equalTo(TEST_TITLE),
+                        DESCRIPTION, equalTo(Double.toString(SOME_INTEGER)),
+                        ACTIVE, equalTo(FALSE),
+                        COMPLETED, equalTo(TRUE)
+                );
+    }
+
+    @Test
+    public void putSpecificUpdatesWithBooleanDescriptionConverted(){
+        int id = postCreatesWithFullBody();
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(TITLE, TEST_TITLE);
+        givenBody.put(DESCRIPTION, SOME_BOOLEAN);
+        givenBody.put(ACTIVE, false);
+        givenBody.put(COMPLETED, true);
+
+        given().
+                pathParam(ID, id).
+                body(givenBody).
+                when().
+                put(SPECIFIC_PROJECT_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(HttpStatus.SC_OK)
+                .body(
+                        ID, equalTo(String.valueOf(id)),
+                        TITLE, equalTo(TEST_TITLE),
+                        DESCRIPTION, equalTo(Boolean.toString(SOME_BOOLEAN)),
+                        ACTIVE, equalTo(FALSE),
+                        COMPLETED, equalTo(TRUE)
+                );
+    }
+
+    @Test
     public void putSpecificUpdatesWithoutDescription(){
         int id = postCreatesWithFullBody();
 
@@ -643,6 +934,7 @@ public class ProjectsCrudTest {
                 .contentType(ContentType.JSON)
                 .statusCode(HttpStatus.SC_OK)
                 .body(
+                        ID, equalTo(String.valueOf(id)),
                         TITLE, equalTo(OTHER_TEST_TITLE),
                         DESCRIPTION, equalTo(EMPTY_STRING),
                         ACTIVE, equalTo(FALSE),
@@ -702,7 +994,7 @@ public class ProjectsCrudTest {
                 );
     }
 
-    // BUG - TITLE CAN BE MISSING
+    // BUG - TITLE CAN BE EMPTY
     // CURRENT BEHAVIOUR
     @Test
     public void putSpecificWithEmptyTitleReturnsEmptyTitle(){
@@ -750,7 +1042,7 @@ public class ProjectsCrudTest {
                 .statusCode(not(equalTo(HttpStatus.SC_BAD_REQUEST)));
     }
 
-    // BUG - TITLE CAN BE MISSING
+    // BUG - TITLE CAN BE WHITESPACE
     // CURRENT BEHAVIOUR
     @Test
     public void putSpecificWithWhitespaceTitleReturnsEmptyTitle(){
@@ -800,4 +1092,570 @@ public class ProjectsCrudTest {
                 .statusCode(not(equalTo(HttpStatus.SC_BAD_REQUEST)));
     }
 
+    @Test
+    public void postSpecificUpdatesWithFullBody(){
+        int id = postCreatesWithFullBody();
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(TITLE, OTHER_TEST_TITLE);
+        givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
+        givenBody.put(ACTIVE, false);
+        givenBody.put(COMPLETED, true);
+
+        given().
+                pathParam(ID, id).
+                body(givenBody).
+                when().
+                post(SPECIFIC_PROJECT_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(HttpStatus.SC_OK)
+                .body(
+                        ID, equalTo(String.valueOf(id)),
+                        TITLE, equalTo(OTHER_TEST_TITLE),
+                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION),
+                        ACTIVE, equalTo(FALSE),
+                        COMPLETED, equalTo(TRUE)
+                );
+    }
+
+    @Test
+    public void postSpecificCreatesWithXML() throws ParserConfigurationException, TransformerException, TransformerConfigurationException {
+        int id = postCreatesWithFullBody();
+
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder documentBuilder = factory.newDocumentBuilder();
+
+        Document body = documentBuilder.newDocument();
+        Element root = body.createElement(PROJECT);
+        body.appendChild(root);
+
+        Element title = body.createElement(TITLE);
+        title.appendChild(body.createTextNode(TEST_TITLE));
+        root.appendChild(title);
+
+
+        Element description = body.createElement(DESCRIPTION);
+        description.appendChild(body.createTextNode(TEST_DESCRIPTION));
+        root.appendChild(description);
+
+        Element active = body.createElement(ACTIVE);
+        active.appendChild(body.createTextNode(TRUE));
+        root.appendChild(active);
+
+        Element completed = body.createElement(COMPLETED);
+        completed.appendChild(body.createTextNode(FALSE));
+        root.appendChild(completed);
+
+        Transformer transformer = (TransformerFactory.newInstance()).newTransformer();
+        StringWriter writer = new StringWriter();
+        transformer.transform(new DOMSource(body), new StreamResult(writer));
+
+        String xmlBody = writer.getBuffer().toString();
+
+        given().
+                pathParam(ID, id).
+                body(xmlBody).
+                contentType(ContentType.XML).
+                accept(ContentType.XML).
+                when().
+                post(SPECIFIC_PROJECT_PATH).
+                then().
+                contentType(ContentType.XML).
+                statusCode(HttpStatus.SC_OK).
+                body(
+                        PROJECT+"."+TITLE, equalTo(TEST_TITLE),
+                        PROJECT+"."+DESCRIPTION, equalTo(TEST_DESCRIPTION),
+                        PROJECT+"."+ACTIVE, equalTo(TRUE),
+                        PROJECT+"."+COMPLETED, equalTo(FALSE)
+                );
+    }
+
+    @Test
+    public void postSpecificUpdatesWithIntegerTitleConverted(){
+        int id = postCreatesWithFullBody();
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(TITLE, SOME_INTEGER);
+        givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
+        givenBody.put(ACTIVE, false);
+        givenBody.put(COMPLETED, true);
+
+        given().
+                pathParam(ID, id).
+                body(givenBody).
+                when().
+                post(SPECIFIC_PROJECT_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(HttpStatus.SC_OK)
+                .body(
+                        ID, equalTo(String.valueOf(id)),
+                        TITLE, equalTo(Double.toString(SOME_INTEGER)),
+                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION),
+                        ACTIVE, equalTo(FALSE),
+                        COMPLETED, equalTo(TRUE)
+                );
+    }
+
+    @Test
+    public void postSpecificUpdatesWithBooleanTitleConverted(){
+        int id = postCreatesWithFullBody();
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(TITLE, SOME_BOOLEAN);
+        givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
+        givenBody.put(ACTIVE, false);
+        givenBody.put(COMPLETED, true);
+
+        given().
+                pathParam(ID, id).
+                body(givenBody).
+                when().
+                post(SPECIFIC_PROJECT_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(HttpStatus.SC_OK)
+                .body(
+                        ID, equalTo(String.valueOf(id)),
+                        TITLE, equalTo(Boolean.toString(SOME_BOOLEAN)),
+                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION),
+                        ACTIVE, equalTo(FALSE),
+                        COMPLETED, equalTo(TRUE)
+                );
+    }
+
+    @Test
+    public void postSpecificUpdatesWithoutTitle(){
+        int id = postCreatesWithFullBody();
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
+        givenBody.put(ACTIVE, false);
+        givenBody.put(COMPLETED, true);
+
+        given().
+                pathParam(ID, id).
+                body(givenBody).
+                when().
+                post(SPECIFIC_PROJECT_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(HttpStatus.SC_OK)
+                .body(
+                        ID, equalTo(String.valueOf(id)),
+                        TITLE, equalTo(TEST_TITLE),
+                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION),
+                        ACTIVE, equalTo(FALSE),
+                        COMPLETED, equalTo(TRUE)
+                );
+    }
+
+    @Test
+    public void postSpecificUpdatesWithoutDescription(){
+        int id = postCreatesWithFullBody();
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(TITLE, OTHER_TEST_TITLE);
+        givenBody.put(ACTIVE, false);
+        givenBody.put(COMPLETED, true);
+
+        given().
+                pathParam(ID, id).
+                body(givenBody).
+                when().
+                post(SPECIFIC_PROJECT_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(HttpStatus.SC_OK)
+                .body(
+                        ID, equalTo(String.valueOf(id)),
+                        TITLE, equalTo(OTHER_TEST_TITLE),
+                        DESCRIPTION, equalTo(TEST_DESCRIPTION),
+                        ACTIVE, equalTo(FALSE),
+                        COMPLETED, equalTo(TRUE)
+                );
+    }
+
+    @Test
+    public void postSpecificUpdatesWithoutActive(){
+        int id = postCreatesWithFullBody();
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(TITLE, OTHER_TEST_TITLE);
+        givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
+        givenBody.put(COMPLETED, true);
+
+        given().
+                pathParam(ID, id).
+                body(givenBody).
+                when().
+                post(SPECIFIC_PROJECT_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(HttpStatus.SC_OK)
+                .body(
+                        ID, equalTo(String.valueOf(id)),
+                        ID, equalTo(String.valueOf(id)),
+                        TITLE, equalTo(OTHER_TEST_TITLE),
+                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION),
+                        ACTIVE, equalTo(TRUE),
+                        COMPLETED, equalTo(TRUE)
+                );
+    }
+
+    @Test
+    public void postSpecificUpdatesWithoutCompleted(){
+        int id = postCreatesWithFullBody();
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(TITLE, OTHER_TEST_TITLE);
+        givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
+        givenBody.put(ACTIVE, false);
+
+        given().
+                pathParam(ID, id).
+                body(givenBody).
+                when().
+            post(SPECIFIC_PROJECT_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(HttpStatus.SC_OK)
+                .body(
+                        ID, equalTo(String.valueOf(id)),
+                        TITLE, equalTo(OTHER_TEST_TITLE),
+                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION),
+                        ACTIVE, equalTo(FALSE),
+                        COMPLETED, equalTo(FALSE)
+                );
+    }
+
+    @Test
+    public void postSpecificUpdatesWithIntegerDescriptionConverted(){
+        int id = postCreatesWithFullBody();
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(TITLE, TEST_TITLE);
+        givenBody.put(DESCRIPTION, SOME_INTEGER);
+        givenBody.put(ACTIVE, false);
+        givenBody.put(COMPLETED, true);
+
+        given().
+                pathParam(ID, id).
+                body(givenBody).
+                when().
+                post(SPECIFIC_PROJECT_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(HttpStatus.SC_OK)
+                .body(
+                        ID, equalTo(String.valueOf(id)),
+                        TITLE, equalTo(TEST_TITLE),
+                        DESCRIPTION, equalTo(Double.toString(SOME_INTEGER)),
+                        ACTIVE, equalTo(FALSE),
+                        COMPLETED, equalTo(TRUE)
+                );
+    }
+
+    @Test
+    public void postSpecificUpdatesWithBooleanDescriptionConverted(){
+        int id = postCreatesWithFullBody();
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(TITLE, TEST_TITLE);
+        givenBody.put(DESCRIPTION, SOME_BOOLEAN);
+        givenBody.put(ACTIVE, false);
+        givenBody.put(COMPLETED, true);
+
+        given().
+                pathParam(ID, id).
+                body(givenBody).
+                when().
+                post(SPECIFIC_PROJECT_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(HttpStatus.SC_OK)
+                .body(
+                        ID, equalTo(String.valueOf(id)),
+                        TITLE, equalTo(TEST_TITLE),
+                        DESCRIPTION, equalTo(Boolean.toString(SOME_BOOLEAN)),
+                        ACTIVE, equalTo(FALSE),
+                        COMPLETED, equalTo(TRUE)
+                );
+    }
+
+    @Test
+    public void postSpecificWithEmptyTitle(){
+        int id = postCreatesWithFullBody();
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
+        givenBody.put(COMPLETED, true);
+        givenBody.put(ACTIVE, false);
+
+        given().
+                pathParam(ID, id).
+                body(givenBody).
+                when().
+                post(SPECIFIC_PROJECT_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(HttpStatus.SC_OK)
+                .body(
+                        ID, equalTo(String.valueOf(id)),
+                        TITLE, equalTo(TEST_TITLE),
+                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION),
+                        ACTIVE, equalTo(FALSE),
+                        COMPLETED, equalTo(TRUE)
+                );
+    }
+
+    // BUG - TITLE CAN BE WHITESPACE
+    // CURRENT BEHAVIOUR
+    @Test
+    public void postSpecificWithWhitespaceTitleReturnsEmptyTitle(){
+        int id = postCreatesWithFullBody();
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(TITLE, WHITESPACE_STRING);
+        givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
+        givenBody.put(COMPLETED, true);
+        givenBody.put(ACTIVE, false);
+
+        given().
+                pathParam(ID, id).
+                body(givenBody).
+                when().
+                post(SPECIFIC_PROJECT_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(HttpStatus.SC_OK)
+                .body(
+                        ID, equalTo(String.valueOf(id)),
+                        TITLE, equalTo(WHITESPACE_STRING),
+                        DESCRIPTION, equalTo(OTHER_TEST_DESCRIPTION),
+                        ACTIVE, equalTo(FALSE),
+                        COMPLETED, equalTo(TRUE)
+                );
+    }
+
+    //DOES NOT HAVE EXPECTED BEHAVIOUR
+    @Test
+    public void postSpecificWithWhitespaceTitleDoesNotReject(){
+        int id = postCreatesWithFullBody();
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(TITLE, WHITESPACE_STRING);
+        givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
+        givenBody.put(COMPLETED, true);
+        givenBody.put(ACTIVE, false);
+
+        given().
+                pathParam(ID, id).
+                body(givenBody).
+                when().
+                post(SPECIFIC_PROJECT_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(not(equalTo(HttpStatus.SC_BAD_REQUEST)));
+    }
+
+    @Test
+    public void deleteSpecificDeletesProject(){
+        int id = postCreatesWithFullBody();
+
+        List<Map<String, Object>> projectsBefore = when().
+                get(ALL_PROJECTS_PATH).
+                then().
+                contentType(ContentType.JSON).
+                statusCode(HttpStatus.SC_OK).
+                extract().
+                body().
+                jsonPath().
+                getList(PROJECTS);
+
+        given().
+                pathParam(ID, id).
+                when().
+                delete(SPECIFIC_PROJECT_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(HttpStatus.SC_OK);
+
+        List<Map<String, Object>> projectsAfter = when().
+                get(ALL_PROJECTS_PATH).
+                then().
+                contentType(ContentType.JSON).
+                statusCode(HttpStatus.SC_OK).
+                extract().
+                body().
+                jsonPath().
+                getList(PROJECTS);
+
+        Assertions.assertTrue(
+                projectsAfter.size() == projectsBefore.size() -1 &&
+                        projectsAfter.stream().noneMatch(
+                                object -> object.get(ID).equals(String.valueOf(id))
+                        )
+        );
+    }
+
+    @Test
+    public void deleteSpecificDeletesProjectXML(){
+        int id = postCreatesWithFullBody();
+
+        List<Map<String, Object>> projectsBefore = when().
+                get(ALL_PROJECTS_PATH).
+                then().
+                contentType(ContentType.JSON).
+                statusCode(HttpStatus.SC_OK).
+                extract().
+                body().
+                jsonPath().
+                getList(PROJECTS);
+
+        given().
+                pathParam(ID, id).
+                contentType(ContentType.XML).
+                accept(ContentType.XML).
+                when().
+                delete(SPECIFIC_PROJECT_PATH)
+                .then()
+                .contentType(ContentType.XML)
+                .statusCode(HttpStatus.SC_OK);
+
+        List<Map<String, Object>> projectsAfter = when().
+                get(ALL_PROJECTS_PATH).
+                then().
+                contentType(ContentType.JSON).
+                statusCode(HttpStatus.SC_OK).
+                extract().
+                body().
+                jsonPath().
+                getList(PROJECTS);
+
+        Assertions.assertTrue(
+                projectsAfter.size() == projectsBefore.size() -1 &&
+                        projectsAfter.stream().noneMatch(
+                                object -> object.get(ID).equals(String.valueOf(id))
+                        )
+        );
+    }
+
+    @Test
+    public void deleteSpecificTwiceRejects() {
+        int id = postCreatesWithFullBody();
+
+        List<Map<String, Object>> projectsBefore = when().
+                get(ALL_PROJECTS_PATH).
+                then().
+                contentType(ContentType.JSON).
+                statusCode(HttpStatus.SC_OK).
+                extract().
+                body().
+                jsonPath().
+                getList(PROJECTS);
+
+        given().
+                pathParam(ID, id).
+                when().
+                delete(SPECIFIC_PROJECT_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(HttpStatus.SC_OK);
+
+        given().
+                pathParam(ID, id).
+                when().
+                delete(SPECIFIC_PROJECT_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(HttpStatus.SC_NOT_FOUND);
+    }
+
+    @Test
+    public void deleteNotFoundRejects() {
+        given().
+                pathParam(ID, 10001).
+                when().
+                delete(SPECIFIC_PROJECT_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(HttpStatus.SC_NOT_FOUND);
+    }
+
+    @Test
+    public void deleteNonIntegerIDRejects() {
+        given().
+                pathParam(ID, "asefsadfa").
+                when().
+                delete(SPECIFIC_PROJECT_PATH)
+                .then()
+                .contentType(ContentType.JSON)
+                .statusCode(HttpStatus.SC_NOT_FOUND);
+    }
+
+    @Test
+    public void patchSpecificNotAllowed(){
+        int id = postCreatesWithFullBody();
+
+        final HashMap<String, Object> givenBody = new HashMap<>();
+        givenBody.put(TITLE, OTHER_TEST_TITLE);
+        givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
+        givenBody.put(ACTIVE, false);
+        givenBody.put(COMPLETED, true);
+
+        given().
+                pathParam(ID, id).
+                body(givenBody).
+                when().
+                patch(SPECIFIC_PROJECT_PATH).
+                then().
+                statusCode(HttpStatus.SC_METHOD_NOT_ALLOWED);
+    }
+
+    @Test
+    public void patchSpecificNotAllowedXML() throws ParserConfigurationException, TransformerException, TransformerConfigurationException {
+        int id = postCreatesWithFullBody();
+
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder documentBuilder = factory.newDocumentBuilder();
+
+        Document body = documentBuilder.newDocument();
+        Element root = body.createElement(PROJECT);
+        body.appendChild(root);
+
+        Element title = body.createElement(TITLE);
+        title.appendChild(body.createTextNode(TEST_TITLE));
+        root.appendChild(title);
+
+
+        Element description = body.createElement(DESCRIPTION);
+        description.appendChild(body.createTextNode(TEST_DESCRIPTION));
+        root.appendChild(description);
+
+        Element active = body.createElement(ACTIVE);
+        active.appendChild(body.createTextNode(TRUE));
+        root.appendChild(active);
+
+        Element completed = body.createElement(COMPLETED);
+        completed.appendChild(body.createTextNode(FALSE));
+        root.appendChild(completed);
+
+        Transformer transformer = (TransformerFactory.newInstance()).newTransformer();
+        StringWriter writer = new StringWriter();
+        transformer.transform(new DOMSource(body), new StreamResult(writer));
+
+        String xmlBody = writer.getBuffer().toString();
+
+        given().
+                pathParam(ID, id).
+                body(xmlBody).
+                contentType(ContentType.XML).
+                accept(ContentType.XML).
+                when().
+                patch(SPECIFIC_PROJECT_PATH).
+                then().
+                statusCode(HttpStatus.SC_METHOD_NOT_ALLOWED);
+    }
 }
