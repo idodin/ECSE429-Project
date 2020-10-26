@@ -15,12 +15,11 @@ import uk.co.compendiumdev.sparkstart.Port;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Provided Source Code from EvilTester Repository.
+ * All credits go to the author of the repository.
+ */
 public class Environment {
-
-    /**
-     *  could just use `RestAssured.baseURI = Environment.getBaseUri();` instead
-     */
-
     public static String getEnv(String urlPath){
         return  getBaseUri() + urlPath;
     }
@@ -50,10 +49,5 @@ public class Environment {
             new ThingifierRestServer("", thingifier, apiDefn, new DefaultGUIHTML());
             return "http://localhost:4567";
         }
-
-
-
-        // TODO: incorporate browsermob proxy and allow configuration of all
-        //  requests through a proxy file to output a HAR file of all requests for later review
     }
 }

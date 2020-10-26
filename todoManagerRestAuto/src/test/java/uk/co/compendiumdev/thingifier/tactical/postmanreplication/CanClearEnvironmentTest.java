@@ -7,12 +7,11 @@ import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.when;
 
+/**
+ * Provided code from EvilTester repository
+ * All credits go to the author of the repository
+ */
 public class CanClearEnvironmentTest {
-
-    /*
-     * A quick set of test methods to replicate the automated execution in Postman to allow compare and contrast
-       https://github.com/eviltester/thingifier/blob/master/docs/rest_testing/TodoManagerThingifier.postman_collection.json
-     */
 
     @BeforeAll
     public static void clearDataFromEnv(){
@@ -50,7 +49,6 @@ public class CanClearEnvironmentTest {
 
     @Test
     public void shouldBeNoCategories(){
-
 
         Assertions.assertEquals(0, when().get(Environment.getEnv("/categories")).
                 then().

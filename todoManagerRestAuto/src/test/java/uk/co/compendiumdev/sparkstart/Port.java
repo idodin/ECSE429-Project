@@ -6,7 +6,9 @@ import java.net.Socket;
 import java.net.SocketAddress;
 
 /**
- * check if port is in use
+ * Checks if Port is in USE
+ * Provided code from EvilTester Repository
+ * All credits go to author of that repository
  */
 public class Port {
 
@@ -14,7 +16,6 @@ public class Port {
         return inUse(host, Integer.valueOf(port));
     }
 
-    // http://stackoverflow.com/questions/434718/sockets-discover-port-availability-using-java
     public static boolean inUse(String host, int port) {
         Socket s = null;
         System.out.println("Checking for port on " + host + ":" + port);
@@ -40,7 +41,6 @@ public class Port {
                 } catch (IOException e) {
                     System.out.println("Port " + port + " check had an error ");
                     e.printStackTrace();
-                    // swallow exception and return false for our use case
                     return false;
                 }
             }
