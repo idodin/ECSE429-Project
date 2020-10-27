@@ -1,3 +1,6 @@
+Imad Dodin | 260713381
+Nada Marawan | 260720514
+
 ## Session 2 Notes
 
 We use Charter Driven Session Based Exploratory Testing to study the behavior of the “rest api todo list manager. The Charter is:
