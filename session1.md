@@ -5,6 +5,21 @@
 #### Ismail Ziouti 260807219
 
 
+## Charter
+- Identify capabilities and areas of potential instability of the “rest
+api todo list manager”.
+
+- Identify documented and undocumented “rest api todo list manager”
+capabilities.
+
+- For each capability create a script or small program to demonstrate
+the capability.
+
+- Exercise each capability identified with data typical to the intended
+use of the application.
+
+
+
 ### GET /projects
 
 ```
