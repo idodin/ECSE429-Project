@@ -1,5 +1,10 @@
 ## Session 1 Notes
 
+### Testers Name:
+#### Farouk Arab 260806502
+#### Ismail Ziouti 260807219
+
+
 ### GET /projects
 
 ```
@@ -114,6 +119,56 @@ Areas of potential risks:
 Test Ideas:
 - Test to delete all todos
 - Test to delete a specific todo
+
+### PUT/todos/:id
+
+```
+curl --location --request PUT 'localhost:4567/todos/1' \
+--data-raw '{
+    
+    "title":"hello world!"
+}'
+
+```
+
+```json
+{
+  "id": "1",
+  "title": "hello world!",
+  "doneStatus": "false",
+  "description": ""
+}
+```
+
+Notes:
+
+- Tester decided to update the full body of a specific todo 
+- Observed all the fields were successfuly updated
+- Tester decided to update a specific todo's title with an integer and a boolean input 
+- Observed the input is converted to string, thus the title was successfly updated 
+- Tester decided to update title and doneStatus
+- Observed the title and the doneStatus were succefully updated BUT the description has been erased
+- Tester decided to only update the title and description
+- Observed that doneStatus becomes false even though it was originally true 
+
+Areas of potential risks:
+- Updating one field and not updating the other fields
+
+Test Ideas:
+- Test updating todos with full body input
+- Test updating todo's title with an integer 
+- Test updating todo's title with a boolean
+- Test updating todo's title and doneStatus without updating description
+- Test updating todo's title and description without doneStatus
+
+Capabilities: 
+- Able to update a todo with full body
+- Able to update a title, a description and doneStatus
+- Able to create a todo with only a title as input
+
+
+
+
 
 
 
