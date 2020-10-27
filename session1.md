@@ -90,6 +90,31 @@ Capabilities:
 - Able to generate an ID for each todo created
 - Able to create a todo with only a title as input
 
+### DEL/todos
+
+```
+curl --location --request DELETE 'localhost:4567/todos'
+```
+```
+curl --location --request DELETE 'localhost:4567/todos/8'
+```
+
+```json
+Method not Allowed
+```
+Notes:
+- Tester tried to delete all todos instances
+- Observed request not allowed
+- Tester tried to delete a specific todo using its id
+- Observed that todo was successfully removed
+
+Areas of potential risks:
+- delete a todo using a non existent ID
+
+Test Ideas:
+- Test to delete all todos
+- Test to delete a specific todo
+
 
 
 
