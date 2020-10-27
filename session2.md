@@ -126,6 +126,37 @@ curl --location --request POST 'localhost:4567/projects' \
 }
 ```
 
+Notes:
+- Tester decided to input integer, string and boolean titles
+- Observed that integer and boolean values for title are automatically converted into a string
+- Tester decided to input integer, string and boolean descriptions
+- Observed that integer and boolean values for description are automatically converted into a string
+- Tester decided to try omitting active / completed boolean fields
+- Observed that active / completed boolean fields default to false when omitted
+
+Test Ideas:
+- Test creating project with integer, string and boolean titles
+- Test creating projects in both XML and JSON formt 
+- Test creating proejcts with empty / whitespace titles
+- Test creating projects with malformed JSON / XML
+
+
+
+### PUT /projects
+```
+curl --location --request PUT 'localhost:4567/projects'
+```
+```
+PUT Method Not Allowed 405
+```
+
+
+Test Ideas:
+- Test updating project when no projects exist (no id passes)
+
+Areas of potential risk:
+-  Updating one project when not allowed
+
 
 
 Notes:
@@ -142,14 +173,6 @@ Test Ideas:
 - Test creating proejcts with empty / whitespace titles
 - Test creating projects with malformed JSON / XML
 
-### PUT /projects
-```
-curl --location --request PUT 'localhost:4567/projects'
-```
-```
-PUT Method Not Allowed 405
-```
-
 ### DEL /projects
 ```
 curl --location --request DELETE 'localhost:4567/projects'
@@ -157,6 +180,19 @@ curl --location --request DELETE 'localhost:4567/projects'
 ```
 Method Not Allowed
 ```
+Notes:
+- Tester tried to to request all projects from endpoint 
+- Observed that endpoint returns all projects in an array
+
+Test Ideas:
+- Test deleting projects when no projects exist
+- Test deleting projects when several projects exist
+- Test limits of how many projects can be returned
+
+Areas of potential risk:
+- Projects not correctly deleting when passed correcet id
+- Projects  correctly deleting when no passed correct id
+
 
 ### GET /projects/:id
 ```
@@ -326,6 +362,8 @@ curl --location --request PUT 'localhost:4567/projects/1' \
 }
 ```
 
+
+
 ### POST /projects/:id
 ```
 curl --location --request POST 'localhost:4567/projects/3' \
@@ -423,6 +461,7 @@ curl --location --request POST 'localhost:4567/projects/3' \
 }
 ```
 
+
 ### DEL /projects/:id
 ```
 curl --location --request DELETE 'localhost:4567/projects/:id'
@@ -431,10 +470,17 @@ curl --location --request DELETE 'localhost:4567/projects/:id'
 No response body
 ```
 
+
 ### GET /projects/:id/tasks
 ```
 curl --location --request GET 'localhost:4567/projects/3/tasks'
 ```
+Notes:
+- Tester tried to to request all projects from endpoint 
+- Observed that endpoint returns all projects in an array
+
+
+
 
 ### POST /projects/:id/tasks
 ```
@@ -557,6 +603,7 @@ curl --location --request POST 'localhost:4567/categories' \
 }
 ```
 
+
 ### GET /categories
 ```
 curl --location --request GET 'localhost:4567/categories'
@@ -595,6 +642,8 @@ curl --location --request DELETE 'localhost:4567/categories'
 method not allowed
 ```
 
+
+
 ### PUT /categories
 ```
 curl --location --request PUT 'localhost:4567/categories' \
@@ -606,6 +655,7 @@ curl --location --request PUT 'localhost:4567/categories' \
 ```
 method not allowed
 ```
+
 
 ### POST /categories/:id
 ```
@@ -684,6 +734,7 @@ curl --location --request POST 'localhost:4567/categories/sdfsafasf' \
 }
 ```
 
+
 ### GET /categories/:id
 ```
 curl --location --request GET 'localhost:4567/categories/2'
@@ -721,6 +772,8 @@ curl --location --request GET 'localhost:4567/categories/adsfsfaf'
   ]
 }
 ```
+
+
 ### DEL /categories/:id
 
 ```
@@ -753,6 +806,8 @@ curl --location --request DELETE 'localhost:4567/categories/asdfsfa'
   ]
 }
 ```
+
+
 
 ### PUT /categories/:id
 ```
