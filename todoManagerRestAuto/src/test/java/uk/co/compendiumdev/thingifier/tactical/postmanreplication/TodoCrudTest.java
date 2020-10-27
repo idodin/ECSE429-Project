@@ -374,8 +374,6 @@ public class TodoCrudTest {
                 )
         );
     }
-    
-    
  
     @Test
     public void getSpecificTodoReturnsBody() {

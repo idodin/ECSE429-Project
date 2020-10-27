@@ -58,6 +58,8 @@ public class ProjectsCrudTest {
     private static final int SOME_INTEGER = 1;
     private static final boolean SOME_BOOLEAN = true;
 
+    private static int id = -1;
+
     // Response Codes
 
     @BeforeEach
@@ -77,7 +79,7 @@ public class ProjectsCrudTest {
     }
 
     @Test
-    public int postCreatesWithFullBody(){
+    public void postCreatesWithFullBody(){
 
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, TEST_TITLE);
@@ -85,7 +87,7 @@ public class ProjectsCrudTest {
         givenBody.put(ACTIVE, true);
         givenBody.put(COMPLETED, false);
 
-        String id = given().
+        String stringId = given().
             body(givenBody).
         when().
             post(ALL_PROJECTS_PATH)
@@ -101,7 +103,7 @@ public class ProjectsCrudTest {
                 .extract()
                 .path(ID);
 
-        return Integer.parseInt(id);
+        id = Integer.parseInt(stringId);
     }
 
     @Test
@@ -657,7 +659,7 @@ public class ProjectsCrudTest {
 
     @Test
     public void getSpecificProjectReturnsBody() {
-        int id = postCreatesWithFullBody();
+        postCreatesWithFullBody();
 
         Map<String, Object> project = (Map<String, Object>)given().
                 pathParam(ID, id).
@@ -684,7 +686,7 @@ public class ProjectsCrudTest {
 
     @Test
     public void getSpecificProjectReturnsXMLBody() {
-        int id = postCreatesWithFullBody();
+        postCreatesWithFullBody();
 
                 given().
                     pathParam(ID, id).
@@ -731,7 +733,7 @@ public class ProjectsCrudTest {
 
     @Test
     public void putSpecificUpdatesWithFullBody(){
-        int id = postCreatesWithFullBody();
+        postCreatesWithFullBody();
 
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, OTHER_TEST_TITLE);
@@ -758,7 +760,7 @@ public class ProjectsCrudTest {
 
     @Test
     public void putSpecificCreatesWithXML() throws ParserConfigurationException, TransformerException, TransformerConfigurationException {
-        int id = postCreatesWithFullBody();
+        postCreatesWithFullBody();
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder = factory.newDocumentBuilder();
@@ -810,7 +812,7 @@ public class ProjectsCrudTest {
 
     @Test
     public void putSpecificUpdatesWithIntegerTitleConverted(){
-        int id = postCreatesWithFullBody();
+        postCreatesWithFullBody();
 
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, SOME_INTEGER);
@@ -837,7 +839,7 @@ public class ProjectsCrudTest {
 
     @Test
     public void putSpecificUpdatesWithBooleanTitleConverted(){
-        int id = postCreatesWithFullBody();
+        postCreatesWithFullBody();
 
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, SOME_BOOLEAN);
@@ -864,7 +866,7 @@ public class ProjectsCrudTest {
 
     @Test
     public void putSpecificUpdatesWithIntegerDescriptionConverted(){
-        int id = postCreatesWithFullBody();
+        postCreatesWithFullBody();
 
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, TEST_TITLE);
@@ -891,7 +893,7 @@ public class ProjectsCrudTest {
 
     @Test
     public void putSpecificUpdatesWithBooleanDescriptionConverted(){
-        int id = postCreatesWithFullBody();
+        postCreatesWithFullBody();
 
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, TEST_TITLE);
@@ -918,7 +920,7 @@ public class ProjectsCrudTest {
 
     @Test
     public void putSpecificUpdatesWithoutDescription(){
-        int id = postCreatesWithFullBody();
+        postCreatesWithFullBody();
 
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, OTHER_TEST_TITLE);
@@ -944,7 +946,7 @@ public class ProjectsCrudTest {
 
     @Test
     public void putSpecificUpdatesWithoutActive(){
-        int id = postCreatesWithFullBody();
+        postCreatesWithFullBody();
 
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, OTHER_TEST_TITLE);
@@ -970,7 +972,7 @@ public class ProjectsCrudTest {
 
     @Test
     public void putSpecificUpdatesWithoutCompleted(){
-        int id = postCreatesWithFullBody();
+        postCreatesWithFullBody();
 
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, OTHER_TEST_TITLE);
@@ -998,7 +1000,7 @@ public class ProjectsCrudTest {
     // CURRENT BEHAVIOUR
     @Test
     public void putSpecificWithEmptyTitleReturnsEmptyTitle(){
-        int id = postCreatesWithFullBody();
+        postCreatesWithFullBody();
 
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
@@ -1025,7 +1027,7 @@ public class ProjectsCrudTest {
     //DOES NOT HAVE EXPECTED BEHAVIOUR
     @Test
     public void putSpecificWithEmptyTitleDoesNotReject(){
-        int id = postCreatesWithFullBody();
+        postCreatesWithFullBody();
 
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
@@ -1046,7 +1048,7 @@ public class ProjectsCrudTest {
     // CURRENT BEHAVIOUR
     @Test
     public void putSpecificWithWhitespaceTitleReturnsEmptyTitle(){
-        int id = postCreatesWithFullBody();
+        postCreatesWithFullBody();
 
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, WHITESPACE_STRING);
@@ -1074,7 +1076,7 @@ public class ProjectsCrudTest {
     //DOES NOT HAVE EXPECTED BEHAVIOUR
     @Test
     public void putSpecificWithWhitespaceTitleDoesNotReject(){
-        int id = postCreatesWithFullBody();
+        postCreatesWithFullBody();
 
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, WHITESPACE_STRING);
@@ -1094,7 +1096,7 @@ public class ProjectsCrudTest {
 
     @Test
     public void postSpecificUpdatesWithFullBody(){
-        int id = postCreatesWithFullBody();
+        postCreatesWithFullBody();
 
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, OTHER_TEST_TITLE);
@@ -1121,7 +1123,7 @@ public class ProjectsCrudTest {
 
     @Test
     public void postSpecificCreatesWithXML() throws ParserConfigurationException, TransformerException, TransformerConfigurationException {
-        int id = postCreatesWithFullBody();
+        postCreatesWithFullBody();
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder = factory.newDocumentBuilder();
@@ -1173,7 +1175,7 @@ public class ProjectsCrudTest {
 
     @Test
     public void postSpecificUpdatesWithIntegerTitleConverted(){
-        int id = postCreatesWithFullBody();
+        postCreatesWithFullBody();
 
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, SOME_INTEGER);
@@ -1200,7 +1202,7 @@ public class ProjectsCrudTest {
 
     @Test
     public void postSpecificUpdatesWithBooleanTitleConverted(){
-        int id = postCreatesWithFullBody();
+        postCreatesWithFullBody();
 
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, SOME_BOOLEAN);
@@ -1227,7 +1229,7 @@ public class ProjectsCrudTest {
 
     @Test
     public void postSpecificUpdatesWithoutTitle(){
-        int id = postCreatesWithFullBody();
+        postCreatesWithFullBody();
 
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
@@ -1253,7 +1255,7 @@ public class ProjectsCrudTest {
 
     @Test
     public void postSpecificUpdatesWithoutDescription(){
-        int id = postCreatesWithFullBody();
+        postCreatesWithFullBody();
 
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, OTHER_TEST_TITLE);
@@ -1279,7 +1281,7 @@ public class ProjectsCrudTest {
 
     @Test
     public void postSpecificUpdatesWithoutActive(){
-        int id = postCreatesWithFullBody();
+        postCreatesWithFullBody();
 
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, OTHER_TEST_TITLE);
@@ -1306,7 +1308,7 @@ public class ProjectsCrudTest {
 
     @Test
     public void postSpecificUpdatesWithoutCompleted(){
-        int id = postCreatesWithFullBody();
+        postCreatesWithFullBody();
 
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, OTHER_TEST_TITLE);
@@ -1332,7 +1334,7 @@ public class ProjectsCrudTest {
 
     @Test
     public void postSpecificUpdatesWithIntegerDescriptionConverted(){
-        int id = postCreatesWithFullBody();
+        postCreatesWithFullBody();
 
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, TEST_TITLE);
@@ -1359,7 +1361,7 @@ public class ProjectsCrudTest {
 
     @Test
     public void postSpecificUpdatesWithBooleanDescriptionConverted(){
-        int id = postCreatesWithFullBody();
+        postCreatesWithFullBody();
 
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, TEST_TITLE);
@@ -1386,7 +1388,7 @@ public class ProjectsCrudTest {
 
     @Test
     public void postSpecificWithEmptyTitle(){
-        int id = postCreatesWithFullBody();
+        postCreatesWithFullBody();
 
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(DESCRIPTION, OTHER_TEST_DESCRIPTION);
@@ -1414,7 +1416,7 @@ public class ProjectsCrudTest {
     // CURRENT BEHAVIOUR
     @Test
     public void postSpecificWithWhitespaceTitleReturnsEmptyTitle(){
-        int id = postCreatesWithFullBody();
+        postCreatesWithFullBody();
 
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, WHITESPACE_STRING);
@@ -1442,7 +1444,7 @@ public class ProjectsCrudTest {
     //DOES NOT HAVE EXPECTED BEHAVIOUR
     @Test
     public void postSpecificWithWhitespaceTitleDoesNotReject(){
-        int id = postCreatesWithFullBody();
+        postCreatesWithFullBody();
 
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, WHITESPACE_STRING);
@@ -1462,7 +1464,7 @@ public class ProjectsCrudTest {
 
     @Test
     public void deleteSpecificDeletesProject(){
-        int id = postCreatesWithFullBody();
+        postCreatesWithFullBody();
 
         List<Map<String, Object>> projectsBefore = when().
                 get(ALL_PROJECTS_PATH).
@@ -1502,7 +1504,7 @@ public class ProjectsCrudTest {
 
     @Test
     public void deleteSpecificDeletesProjectXML(){
-        int id = postCreatesWithFullBody();
+        postCreatesWithFullBody();
 
         List<Map<String, Object>> projectsBefore = when().
                 get(ALL_PROJECTS_PATH).
@@ -1544,7 +1546,7 @@ public class ProjectsCrudTest {
 
     @Test
     public void deleteSpecificTwiceRejects() {
-        int id = postCreatesWithFullBody();
+        postCreatesWithFullBody();
 
         List<Map<String, Object>> projectsBefore = when().
                 get(ALL_PROJECTS_PATH).
@@ -1597,7 +1599,7 @@ public class ProjectsCrudTest {
 
     @Test
     public void patchSpecificNotAllowed(){
-        int id = postCreatesWithFullBody();
+        postCreatesWithFullBody();
 
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(TITLE, OTHER_TEST_TITLE);
@@ -1616,7 +1618,7 @@ public class ProjectsCrudTest {
 
     @Test
     public void patchSpecificNotAllowedXML() throws ParserConfigurationException, TransformerException, TransformerConfigurationException {
-        int id = postCreatesWithFullBody();
+        postCreatesWithFullBody();
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder = factory.newDocumentBuilder();
