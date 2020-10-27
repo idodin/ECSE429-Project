@@ -1,5 +1,13 @@
 ## Session 2 Notes
 
+We use Charter Driven Session Based Exploratory Testing to study the behavior of the “rest api todo list manager. The Charter is:
+
+```
+Identify capabilities and areas of potential instability of the “rest api todo list manager”.
+Identify documented and undocumented “rest api todo list manager”capabilities.
+For eachcapability create a script or small program to demonstrate the capability.
+Exercise each capability identified with data typical to the intended use of the application.
+```
 ### GET /projects
 
 ```
