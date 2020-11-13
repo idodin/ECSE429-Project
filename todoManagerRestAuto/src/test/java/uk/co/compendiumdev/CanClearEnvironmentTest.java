@@ -1,11 +1,14 @@
-package uk.co.compendiumdev.thingifier.tactical.postmanreplication;
+package uk.co.compendiumdev;
 
+import io.restassured.RestAssured;
 import io.restassured.path.json.JsonPath;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import uk.co.compendiumdev.Environment;
 
 import static io.restassured.RestAssured.when;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Provided code from EvilTester repository
@@ -15,6 +18,9 @@ public class CanClearEnvironmentTest {
 
     @BeforeAll
     public static void clearDataFromEnv(){
+        RestAssured.baseURI = Environment.getBaseUri();
+        if(RestAssured.baseURI == null) fail("To Do Manager isn't running!");
+
         when().post(Environment.getEnv("/admin/data/thingifier")).then().statusCode(200);
 
         final JsonPath clearedData = when().get(Environment.getEnv("/todos")).then().statusCode(200).extract().body().jsonPath();

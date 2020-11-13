@@ -1,4 +1,4 @@
-package uk.co.compendiumdev.sparkstart;
+package uk.co.compendiumdev.utils;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -18,7 +18,6 @@ public class Port {
 
     public static boolean inUse(String host, int port) {
         Socket s = null;
-        System.out.println("Checking for port on " + host + ":" + port);
 
         try {
 
@@ -26,20 +25,14 @@ public class Port {
             SocketAddress address = new InetSocketAddress(host, port);
             s = new Socket();
             s.connect(address, 5000);
-
-            // If the code makes it this far without an exception it means
-            // something is using the port and has responded.
-            System.out.println("Port " + port + " is in use, assuming proxy is running");
             return true;
         } catch (IOException e) {
-            System.out.println("Port " + port + " is free, no proxy running");
             return false;
         } finally {
             if( s != null){
                 try {
                     s.close();
                 } catch (IOException e) {
-                    System.out.println("Port " + port + " check had an error ");
                     e.printStackTrace();
                     return false;
                 }

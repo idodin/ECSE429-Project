@@ -1,4 +1,4 @@
-package uk.co.compendiumdev.thingifier.tactical.postmanreplication;
+package uk.co.compendiumdev.unit.crud;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import uk.co.compendiumdev.Environment;
 
 import java.util.HashMap;
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.Map;
 import static io.restassured.RestAssured.*;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class RelationshipTest {
     // Clear Data Path
@@ -64,6 +66,7 @@ public class RelationshipTest {
     public void clearDataFromEnv(){
 
         RestAssured.baseURI = Environment.getBaseUri();
+        if(RestAssured.baseURI == null) fail("To Do Manager isn't running!");
 
         post(CLEAR_PATH);
 

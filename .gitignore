@@ -12,3 +12,6 @@ buildNumber.properties
 !/.mvn/wrapper/maven-wrapper.jar
 *.data.txt
 *.iml
+*.DS_Store
+.github
+.idea

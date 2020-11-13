@@ -1,4 +1,4 @@
-package uk.co.compendiumdev.thingifier.tactical.postmanreplication;
+package uk.co.compendiumdev.unit.crud;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import uk.co.compendiumdev.Environment;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -27,6 +28,7 @@ import java.util.Map;
 
 import static io.restassured.RestAssured.*;
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class TodoCrudTest {
     // Todos Paths
@@ -62,6 +64,7 @@ public class TodoCrudTest {
     public void clearDataFromEnv(){
 
         RestAssured.baseURI = Environment.getBaseUri();
+        if(RestAssured.baseURI == null) fail("To Do Manager isn't running!");
 
         post(CLEAR_PATH);
 
