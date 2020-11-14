@@ -14,12 +14,12 @@ Feature: Set Task Priority
     Then  Task "<task_name>" should be categorized "<priority>"
     And   Category "<priority>" should contain task "<task_name>"
 
-    # TODO Expand to include task name example
+
     Examples:
-      | priority |
-      | HIGH     |
-      | MEDIUM   |
-      | LOW      |
+      | priority |task_name |
+      | HIGH     | task_A   |
+      | MEDIUM   | task_B   |
+      | LOW      | task_C   |
 
 
   Scenario Outline: The user successfully categorizes a task as a given priority when other tasks with that priority already exist (Alternate Flow)
@@ -31,20 +31,20 @@ Feature: Set Task Priority
     And   The following tasks exist for each of the following priority levels:
     # TODO Fill out data table
       | task_name | priority  |
+      | task_A    | HIGH      |
+      | task_B    | LOW       |
+      | task_C    | MEDIUM    |
     When  I create a task "<task_name>"
     And  I categorize a task as "<priority>" priority level
     Then  Task "<task_name>" should be categorized "<priority>"
     And   Category "<priority>" should contain task "<task_name>"
-    And   The following tasks should exist for each of the following priority levels:
-    # TODO Fill out data table
-      | task_name | priority  |
 
     # TODO Expand to include task name example
     Examples:
-      | priority |
-      | HIGH     |
-      | MEDIUM   |
-      | LOW      |
+      | priority | task_name |
+      | HIGH     | task_D    |
+      | MEDIUM   | task_E    |
+      | LOW      | task_F    |
 
   Scenario Outline: The user attempts to categorize a task as a given priority when no category exists for that priority level (Error Flow)
     Given An empty category exists for the "<existing_priority_1>" priority level
