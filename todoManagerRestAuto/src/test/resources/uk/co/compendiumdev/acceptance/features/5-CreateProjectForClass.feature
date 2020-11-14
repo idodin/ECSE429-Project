@@ -1,38 +1,56 @@
 
-Feature: create project class
+Feature: create project for class
 
   As a student, I create a to do list for a new class I am taking, so I
   can manage course work.
 
-Scenario Outline: successfuly add a task (normal flow)
-Given there is an emtpy project ECSE429
-When I create a task <"todo">
-And I add the task <"todo"> to ECSE429 project
-Then the project ECSE429 contain the task to do my project B
+Scenario Outline:the user successfuly add a task to a given class (normal flow)
+Given Categories exist for the following priority levels:
+ | priority |
+ | HIGH     |
+ | MEDIUM   |
+ | LOW      |
+
+ And Projects exist for the following courses:
+  | Projects |
+  | ECSE_429 |
+  | ECSE_420 |
+  | COMP_360 |
+
+When I create a task "<todo>"
+And I add the task "<todo>" to  "<project>"
+Then project "<project>" should contain task "<todo>"
+And task "<todo>" should be in "<project>"
 
 Examples:
-| todo |
-| to do my project part A |
-| to do my project part B |
-| to do the report |
+| todo                    | Projects |
+| to do my project part A | ECSE_429 |
+| to do my project part B | ECSE_420 |
+| to do the report        | COMP_360 |
 
-Scenario: successfuly create a class project  and add task to it (alternate flow)
+Scenario Outline: the user successfuly create a class project  and add a task to that project (alternate flow)
 Given there is no project related to a new class
-When I create a project ECSE420
-And I create a task to do lab1
-And I add the task to do lab1 to ECSE420 project
-Then the project ECSE420 should contain the task to do lab1
+When I create a project "<project>"
+And I create a task "<todo>"
+And I add the task "<todo>" to "<project>"
+Then the project"<project>" should contain the task "<todo>"
+And task "<todo>" should be in "<project>"
 
-Scenario: successfuly add task to a class project (alternate flow)
-Given there is a COMP360 project
-And there is a to do assignment1 in COMP360 project
-When I create a task to do assignment2
-And I add the task to do assignment2 to COMP360 project
-Then the project COMP360 should contain the task to do assignment1 and to do assignment2
+Examples:
+| todo                    | Projects |
+| to do my project part A | ECSE_429 |
+| to do my project part B | ECSE_420 |
+| to do the report        | COMP_360 |
 
 
-Scenario: add a task to a non-existing project related to the specific class (Error flow)
-Given there is a non-existing ECSE223 project
-When I create a task to do homework
-And I add the task to do homework to ECSE223 project
-Then Bad request
+Scenario Outline: the user add a task to a non-existing project related to a specific class (Error flow)
+Given An empty project  "<existing_project_1>" exists
+And   An empty project  "<existing_project_2>" exists
+When  I create a task "<todo>"
+And I add task "<todo>"  to "<new_project>" project
+Then  I should receive an error informing me that "<new_project>" project does not exist
+
+Examples:
+| existing_project_1 | existing_project_2 | new_project   | todo        |
+| ECSE_223           | FACC_300           | COMP_350      | assignment  |
+| MATH_240           | ECSE_205           | FACC_400      | lab         |
