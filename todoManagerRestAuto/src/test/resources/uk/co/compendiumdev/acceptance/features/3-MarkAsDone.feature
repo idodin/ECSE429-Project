@@ -28,7 +28,8 @@ Feature: Mark Task As Done
 
   Scenario Outline: The user successfully marks an incomplete task as done (Normal Flow)
     When   I mark task "<task>" as "<done_status>"
-    Then   The status of task "<task>" should be "<done_status>"
+    Then   I should receive a confirmation that my operation was successful
+    And    The status of task "<task>" should be "<done_status>"
 
     Examples:
       | task       | done_status |
@@ -39,7 +40,8 @@ Feature: Mark Task As Done
 
   Scenario Outline: The user successfully marks a task that has already been completed as done (Alternate Flow)
     When  I mark task "<task>" as  "<done_status>"
-    Then  The status of task "<task>" should be "<done_status>"
+    Then  I should receive a confirmation that my operation was successful
+    And   The status of task "<task>" should be "<done_status>"
 
     Examples:
       | task       | done_status |
@@ -50,7 +52,7 @@ Feature: Mark Task As Done
 
   Scenario Outline: The user attempts to mark a non-existent task as done (Error Flow)
     When  I mark task "<non_existing_task>" as "<done_status>"
-    Then  I should receive an error message informing me that the "<non_existing_task>" doesn't exist
+    Then  I should receive an error informing me that the requested resource was not found
 
     Examples:
       | non_existing_task | done_status   |

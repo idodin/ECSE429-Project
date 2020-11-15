@@ -24,7 +24,8 @@ Feature: Query Remaining Tasks
   # TODO Maybe more tasks returned?
   Scenario Outline : The user successfulLy queries all incomplete task in a course to do list (Normal Flow)
     When  I query all incomplete tasks for the "<course>" course to do list
-    Then  the task "<task>" should be returned
+    Then  I should receive a confirmation that my operation was successful
+    And   the task "<task>" should be returned
 
     Examples:
       | course    |
@@ -34,7 +35,8 @@ Feature: Query Remaining Tasks
 
   Scenario Outline: The user successfully queries all incomplete tasks in a course to do list with no incomplete tasks (Alternate Flow)
     When  I query all incomplete tasks for the "<course>" course to do list
-    Then  No tasks should be returned
+    Then  I should receive a confirmation that my operation was successful
+    And   No tasks should be returned
 
     Examples:
       | course    |
@@ -44,7 +46,7 @@ Feature: Query Remaining Tasks
 
   Scenario Outline: The user attempts to request all incomplete tasks for a course that does not exist (Error Flow)
     When  I query all incomplete tasks for the "<course>" course to do list
-    Then  No tasks should be returned
+    Then  I should receive an error informing me that the requested resource was not found
 
     Examples:
       | course    |

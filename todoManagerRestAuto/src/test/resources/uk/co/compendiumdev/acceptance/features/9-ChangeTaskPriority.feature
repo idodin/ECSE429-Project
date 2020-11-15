@@ -28,7 +28,8 @@ Feature: Change Task Priority
 
   Scenario Outline: The user successfully changes the priority of a task to a new priority (Normal Flow)
     When  I categorize a task as "<priority>" priority level
-    Then  Task "<task_name>" should be categorized "<priority>"
+    Then  I should receive a confirmation that my operation was successful
+    And   Task "<task_name>" should be categorized "<priority>"
     And   Category "<priority>" should contain task "<task_name>"
 
     Examples:
@@ -43,7 +44,8 @@ Feature: Change Task Priority
 
   Scenario Outline: The user successfully sets the priority of a task to the existing priority (Alternate Flow)
     When  I categorize a task as "<priority>" priority level
-    Then  Task "<task_name>" should be categorized "<priority>"
+    Then  I should receive a confirmation that my operation was successful
+    And   Task "<task_name>" should be categorized "<priority>"
     And   Category "<priority>" should contain task "<task_name>"
 
     Examples:
@@ -58,7 +60,8 @@ Feature: Change Task Priority
 
   Scenario Outline: The user attempts to changes the priority of a task to a non-existent priority (Error Flow)
     When  I categorize a task as "<new_priority>" priority level
-    Then  Task "<task_name>" should be categorized "<existing_priority>"
+    Then  I should receive an error informing me that the requested resource was not found
+    And   Task "<task_name>" should be categorized "<existing_priority>"
     And   Category "<existing_priority>" should contain task "<task_name>"
 
     Examples:

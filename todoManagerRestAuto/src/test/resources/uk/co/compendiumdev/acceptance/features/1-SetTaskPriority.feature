@@ -1,60 +1,66 @@
-# TODO Refactor priority to background
-# TODO change to assume that tasks are added to projects and then categorized
 Feature: Set Task Priority
   As a student, I categorize tasks as HIGH, MEDIUM or LOW priority, so I
   can better manage my time.
 
 
-  Scenario Outline: The user successfully categorizes a task as a given priority (Normal Flow)
+  Background:
     Given Categories exist for the following priority levels:
       | priority |
       | HIGH     |
       | MEDIUM   |
       | LOW      |
-    And   No tasks exist for each priority level
-    When  I create a task with name "<task_name>"
-    And   I categorize a task as "<priority>" priority level
-    Then  Task "<task_name>" should be categorized "<priority>"
+    And   Projects exist for the following courses:
+      | course    |
+      | ECSE 429  |
+      | ECSE 420  |
+      | COMP 360  |
+    And   The following tasks exist for their respective courses:
+      | course    | task_name   |
+      | ECSE 429  | assignment0 |
+      | ECSE 420  | lab5-1      |
+      | COMP 360  | study       |
+      | COMP 360  | assignment1 |
+
+
+  Scenario Outline: The user successfully categorizes a task as a given priority (Normal Flow)
+    Given No tasks exist for each priority level
+    When  I categorize task "<task_name>" as "<priority>" priority
+    Then  I should receive a confirmation that my operation was successful
+    And   Task "<task_name>" should be categorized as "<priority>" priority
     And   Category "<priority>" should contain task "<task_name>"
 
     Examples:
-      | priority | task_name  |
-      | HIGH     | task_A     |
-      | MEDIUM   | task_B     |
-      | LOW      | task_C     |
+      | task_name   | priority  |
+      | assignment0 | HIGH      |
+      | lab5-1      | MEDIUM    |
+      | study       | LOW       |
 
 
   Scenario Outline: The user successfully categorizes a task as a given priority when other tasks with that priority already exist (Alternate Flow)
-    Given Categories exist for the following priority levels:
-      | priority |
-      | HIGH     |
-      | MEDIUM   |
-      | LOW      |
-    And   The following tasks exist for each of the following priority levels:
-      | task_name | priority  |
-      | task_A    | HIGH      |
-      | task_B    | LOW       |
-      | task_C    | MEDIUM    |
-    When  I create a task with name "<task_name>"
-    And   I categorize a task as "<priority>" priority level
-    Then  Task "<task_name>" should be categorized "<priority>"
+    And The following tasks exist with their respective statuses, courses and priority levels:
+      | tasks               | statuses            | Projects       | priority    |
+      | task_A              | false               | ECSE 429       | HIGH        |
+      | task_B              | false               | ECSE 420       | LOW         |
+      | task_C              | false               | COMP 360       | MEDIUM      |
+    When  I categorize task "<task_name>" as "<priority>" priority
+    Then  I should receive a confirmation that my operation was successful
+    And   Task "<task_name>" should be categorized as "<priority>" priority
     And   Category "<priority>" should contain task "<task_name>"
+    And   Category "<priority>" should still contain its original tasks
 
     Examples:
-      | priority | task_name |
-      | HIGH     | task_D    |
-      | MEDIUM   | task_E    |
-      | LOW      | task_F    |
+      | task_name   | priority  |
+      | assignment0 | HIGH      |
+      | lab5-1      | MEDIUM    |
+      | study       | LOW       |
 
   Scenario Outline: The user attempts to categorize a task as a given priority when no category exists for that priority level (Error Flow)
-    Given An empty category exists for the "<existing_priority_1>" priority level
-    And   An empty category exists for the "<existing_priority_2>" priority level
-    When  I create a task "<task_name>"
-    And   I categorize a task as "<new_priority>" priority level
-    Then  I should receive an error informing me that "<new_priority>" priority level does not exist
+    When  I categorize task "<task_name>" as "<priority>" priority
+    Then  I should receive an error informing me that the requested resource was not found
+    And   Task "<task_name>" should not be categorized as any priority
 
     Examples:
-      | existing_priority_1 | existing_priority_2 | new_priority  | task_name   |
-      | LOW                 | MEDIUM              | HIGH          | assignment  |
-      | MEDIUM              | HIGH                | LOW           | lab         |
-      | HIGH                | LOW                 | MEDIUM        | report      |
+      | task_name   | priority    |
+      | assignment0 | ULTRA       |
+      | lab5-1      | LO          |
+      | study       | USELESS     |
