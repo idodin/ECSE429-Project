@@ -10,20 +10,21 @@ Feature: Change Task Priority
       | LOW      |
     And Projects exist for the following courses:
       | Projects  |
-      | ECSE_429  |
-      | ECSE_420  |
-      | COMP_360  |
-      | ECSE_223  |
-      | ECSE_202  |
-      | COMP_251  |
+      | ECSE 429  |
+      | ECSE 420  |
+      | COMP 360  |
+      | ECSE 223  |
+      | ECSE 202  |
+      | COMP 251  |
     And The following tasks exist with their respective statuses, courses and priority levels:
-      | tasks               | statuses            | Projects       | priority    |
-      | task_A              | false               | ECSE_429       | HIGH        |
-      | task_B              | false               | ECSE_420       | LOW         |
-      | task_C              | false               | COMP_360       | MEDIUM      |
-      | task_D              | true                | ECSE_223       | HIGH        |
-      | task_E              | true                | ECSE_202       | LOW         |
-      | task_F              | true                | COMP_251       | MEDIUM      |
+    Given The following tasks exist with their respective statuses, courses and priority levels:
+      | task                | completed           | course         | priority    |
+      | task_A              | false               | ECSE 429       | HIGH        |
+      | task_B              | false               | ECSE 420       | LOW         |
+      | task_C              | false               | COMP 360       | MEDIUM      |
+      | task_D              | true                | ECSE 223       | HIGH        |
+      | task_E              | true                | ECSE 202       | LOW         |
+      | task_F              | true                | COMP 251       | MEDIUM      |
 
 
   Scenario Outline: The user successfully changes the priority of a task to a new priority (Normal Flow)

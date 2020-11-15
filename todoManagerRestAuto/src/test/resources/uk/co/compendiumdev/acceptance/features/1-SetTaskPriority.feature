@@ -37,8 +37,8 @@ Feature: Set Task Priority
 
 
   Scenario Outline: The user successfully categorizes a task as a given priority when other tasks with that priority already exist (Alternate Flow)
-    And The following tasks exist with their respective statuses, courses and priority levels:
-      | tasks               | statuses            | Projects       | priority    |
+    Given The following tasks exist with their respective statuses, courses and priority levels:
+      | task                | completed           | course         | priority    |
       | task_A              | false               | ECSE 429       | HIGH        |
       | task_B              | false               | ECSE 420       | LOW         |
       | task_C              | false               | COMP 360       | MEDIUM      |
