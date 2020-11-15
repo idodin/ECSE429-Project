@@ -1,64 +1,71 @@
+# TODO add checks for project existence
 Feature: Change Task Priority
   As a student, I want to adjust the priority of a task, to help better manage my time.
 
-  # FIXME what is the difference between this and the next one
-  Scenario Outline: The user successfully adjusts the priority of a task in non-empty projects (Normal Flow)
+  Background:
     Given Categories exist for the following priority levels:
       | priority |
       | HIGH     |
       | MEDIUM   |
       | LOW      |
-    And   The following tasks exist for each of the following priority levels:
-      | task_name | priority  |
-      | task_A    | HIGH      |
-      | task_B    | LOW       |
-      | task_C    | MEDIUM    |
-    When  I categorize the task "<task_name>" to "<new_priority>" priority level
-    Then  the category "<new_priority>" should  contains the task "<task_name>"
-    And   the category "<priority>" should not contain the task "<task_name>"
+    And Projects exist for the following courses:
+      | Projects  |
+      | ECSE_429  |
+      | ECSE_420  |
+      | COMP_360  |
+      | ECSE_223  |
+      | ECSE_202  |
+      | COMP_251  |
+    And The following tasks exist with their respective statuses, courses and priority levels:
+      | tasks               | statuses            | Projects       | priority    |
+      | task_A              | false               | ECSE_429       | HIGH        |
+      | task_B              | false               | ECSE_420       | LOW         |
+      | task_C              | false               | COMP_360       | MEDIUM      |
+      | task_D              | true                | ECSE_223       | HIGH        |
+      | task_E              | true                | ECSE_202       | LOW         |
+      | task_F              | true                | COMP_251       | MEDIUM      |
+
+
+  Scenario Outline: The user successfully changes the priority of a task to a new priority (Normal Flow)
+    When  I categorize a task as "<priority>" priority level
+    Then  Task "<task_name>" should be categorized "<priority>"
+    And   Category "<priority>" should contain task "<task_name>"
 
     Examples:
-      | task_name     | new_priority | priority |
-      | task_A        | MEDIUM       | HIGH     |
-      | task_B        | HIGH         | LOW      |
-      | task_C        | LOW          | MEDIUM   |
+      | priority  | task_name   |
+      | LOW       | task_A      |
+      | MEDIUM    | task_B      |
+      | LOW       | task_C      |
+      | MEDIUM    | task_D      |
+      | HIGH      | task_C      |
+      | LOW       | task_D      |
 
 
-  Scenario Outline: The user successfully adjusts the priority level of a task (Alternate Flow)
-    Given Categories exist for the following priority levels:
-      | priority |
-      | HIGH     |
-      | MEDIUM   |
-      | LOW      |
-    And   the following task exists for the following priority:
-      | task    | priority |
-      | task_A  | HIGH     |
-    And   there are no tasks in following priority level:
-      | priority |
-      | MEDIUM   |
-      | LOW      |
-    When  I categorize the task "task_A" to "<new_priority>" priority level
-    Then  the "<new_priority>" should contains only the task "task_A"
-    And   the HIGH project should be empty
+  Scenario Outline: The user successfully sets the priority of a task to the existing priority (Alternate Flow)
+    When  I categorize a task as "<priority>" priority level
+    Then  Task "<task_name>" should be categorized "<priority>"
+    And   Category "<priority>" should contain task "<task_name>"
 
     Examples:
-      | new_priority |
-      | MEDIUM       |
-      | LOW          |
+      | priority  | task_name   |
+      | HIGH      | task_A      |
+      | LOW       | task_B      |
+      | MEDIUM    | task_C      |
+      | HIGH      | task_D      |
+      | LOW       | task_C      |
+      | MEDIUM    | task_D      |
 
 
-  Scenario Outline: The user attempts to categorize a non-existing task as a given priority (Error Flow)
-    Given Categories exist for the following priority levels:
-      | priority |
-      | HIGH     |
-      | MEDIUM   |
-      | LOW      |
-    And   a non-existing tasks "<no_existing_task>"
-    When  I adjust the non-existing task "<no_existing_task>" to "<existing_priority_1>" priority level
-    Then  I should receive an error informing me that the task "<no_existing_task>"  does not exist
+  Scenario Outline: The user attempts to changes the priority of a task to a non-existent priority (Error Flow)
+    When  I categorize a task as "<new_priority>" priority level
+    Then  Task "<task_name>" should be categorized "<existing_priority>"
+    And   Category "<existing_priority>" should contain task "<task_name>"
 
     Examples:
-      | no_existing_task   | existing_priority_1 |
-      | assignment         |  LOW                |
-      | lab                |  MEDIUM             |
-      | report             |  HIGH               |
+      | new_priority  | task_name   | existing_priority |
+      | EXTRA         | task_A      | HIGH              |
+      | ULTRA         | task_B      | LOW               |
+      | SOMEWHAT      | task_C      | MEDIUM            |
+      | EXTREME       | task_D      | HIGH              |
+      | USELESS       | task_C      | LOW               |
+      | LO            | task_D      | MEDIUM            |

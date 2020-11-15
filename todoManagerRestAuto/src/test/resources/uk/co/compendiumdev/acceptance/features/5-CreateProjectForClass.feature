@@ -1,61 +1,55 @@
-# FIXME SHOULD BE ABOUT CREATING A PROJECT NOT A TASK
-# Whole scenario should be fixed
-
-# Normal flow - create project
-# Alternate flow - create project with description
-# Error flow - create project with invalid completedStatus (String, Integer)
-
-
+#TODO maybe add more cases
+#  - Alternate: create without specifying active / completion stauts
+#  - Error:  create with incorrect active status
 Feature: Create Project for Class
   As a student, I create a to do list for a new class I am taking, so I can manage course work.
 
 
-  Scenario Outline: The user successfully adds a task to a given class (Normal Flow)
-    Given Categories exist for the following priority levels:
-      | priority |
-      | HIGH     |
-      | MEDIUM   |
-      | LOW      |
-    And  Projects exist for the following courses:
-      | Projects |
-      | ECSE_429 |
-      | ECSE_420 |
-      | COMP_360 |
-    When I create a task "<todo>"
-    And  I add the task "<todo>" to  "<project>"
-    Then Project "<project>" should contain task "<todo>"
-    And  task "<todo>" should be in "<project>"
+  Background:
+    Given Projects exist for the following courses:
+      | course    |
+      | ECSE 429  |
+      | ECSE 420  |
+      | COMP 360  |
+
+
+  Scenario Outline: The user successfully creates a course to do list with no description (Normal Flow)
+    When  I create a course to do list for course "<course>" with active status "<active>" and completion status "<complete>"
+    Then  A course to do list for course "<course>" should exist
+    And   The course to do list for course "<course>" should have active status "<active>"
+    And   The course to do list for course "<course>" should have completion status "<complete>"
+    And   The list of course to do lists should now include a to do list for course "<course>"
 
     Examples:
-      | todo                    | Projects |
-      | to do my project part A | ECSE_429 |
-      | to do my project part B | ECSE_420 |
-      | to do the report        | COMP_360 |
+      | course    | active  | complete  |
+      | COMP 551  | true    | false     |
+      | COMP 273  | false   | true      |
+      | ECSE 437  | true    | true      |
+      | ECSE 326  | false   | false     |
 
 
-  Scenario Outline: The user successfully creates a class project and add a task to that project (alternate flow)
-    Given there is no project related to a new class
-    When  I create a project "<project>"
-    And   I create a task "<todo>"
-    And   I add the task "<todo>" to "<project>"
-    Then  the project"<project>" should contain the task "<todo>"
-    And   task "<todo>" should be in "<project>"
+  Scenario Outline: The user successfully creates a course to do list with a description (Alternate Flow)
+    When  I create a course to do list for course "<course>" with active status "<active>", completion status "<complete>" and description "<description>"
+    Then  A course to do list for course "<course>" should exist
+    And   The course to do list for course "<course>" should have active status "<active>"
+    And   The course to do list for course "<course>" should have completion status "<complete>"
+    And   The list of course to do lists should now include a to do list for course "<course>"
 
     Examples:
-      | todo                    | Projects |
-      | to do my project part A | ECSE_429 |
-      | to do my project part B | ECSE_420 |
-      | to do the report        | COMP_360 |
+      | course    | active  | complete  | description   |
+      | COMP 551  | true    | false     | ML            |
+      | COMP 273  | false   | true      | 273           |
+      | ECSE 437  | true    | true      | Delivery      |
+      | ECSE 326  | false   | false     | Reqs          |
 
 
-  Scenario Outline: the user add a task to a non-existing project related to a specific class (Error flow)
-    Given An empty project  "<existing_project_1>" exists
-    And   An empty project  "<existing_project_2>" exists
-    When  I create a task "<todo>"
-    And   I add task "<todo>"  to "<new_project>" project
-    Then  I should receive an error informing me that "<new_project>" project does not exist
+  Scenario Outline: The user attempts to create a course to do list with an invalid completion status (Alternate Flow)
+    When  I create a course to do list for course "<course>" with active status "<active>", completion status "<complete>" and description "<description>"
+    Then  A course to do list for course "<course>" should not exist
 
-  Examples:
-    | existing_project_1 | existing_project_2 | new_project   | todo        |
-    | ECSE_223           | FACC_300           | COMP_350      | assignment  |
-    | MATH_240           | ECSE_205           | FACC_400      | lab         |
+    Examples:
+      | course    | active  | complete  | description   |
+      | COMP 551  | true    | done      | ML            |
+      | COMP 273  | false   | 1         | 273           |
+      | ECSE 437  | true    | adfaf     | Delivery      |
+      | ECSE 326  | false   | tried     | Reqs          |

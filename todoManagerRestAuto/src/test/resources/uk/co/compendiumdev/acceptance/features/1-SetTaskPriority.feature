@@ -1,3 +1,5 @@
+# TODO Refactor priority to background
+# TODO change to assume that tasks are added to projects and then categorized
 Feature: Set Task Priority
   As a student, I categorize tasks as HIGH, MEDIUM or LOW priority, so I
   can better manage my time.
