@@ -1,3 +1,4 @@
+#TODO could add additional scenarios for tasks with priorities
 Feature: Change Task Description
   As a student, I want to change a task description to better represent the work that I do
 
@@ -22,12 +23,14 @@ Feature: Change Task Description
     When  I change the description of task "<task_name>" to "<new_description>"
     Then  I should receive a confirmation that my operation was successful
     And   Task "<task_name>" should have description "<new_description>"
+    And   Task "<task_name>" should be under the "<course>" course to do list
+    And   "<course>" course to do list should contain task "<task_name>"
 
     Examples:
-      | task_name   | new_description   |
-      | lab         | Parallel Lab 2    |
-      | assignment  | NP-Completeness   |
-      | test        | Final Exam        |
+      | task_name   | new_description   | course    |
+      | lab         | Parallel Lab 2    | ECSE 420  |
+      | assignment  | NP-Completeness   | COMP 360  |
+      | test        | Final Exam        | ECSE 429  |
 
 
   Scenario Outline: The user successfully changes the description for a task without an existing description (Alternate Flow)
@@ -39,12 +42,14 @@ Feature: Change Task Description
     When  I change the description of task "<task_name>" to "<new_description>"
     Then  I should receive a confirmation that my operation was successful
     And   Task "<task_name>" should have description "<new_description>"
+    And   Task "<task_name>" should be under the "<course>" course to do list
+    And   "<course>" course to do list should contain task "<task_name>"
 
     Examples:
-      | task_name   | new_description   |
-      | lab         | Parallel Lab 2    |
-      | assignment  | NP-Completeness   |
-      | test        | Final Exam        |
+      | task_name   | new_description   | course    |
+      | lab         | Parallel Lab 2    | ECSE 420  |
+      | assignment  | NP-Completeness   | COMP 360  |
+      | test        | Final Exam        | ECSE 429  |
 
   Scenario Outline: The user attempts to change the description for a task that doesn't exist (Error Flow)
     Given  The following tasks exist for their respective courses:
@@ -53,7 +58,7 @@ Feature: Change Task Description
       | COMP 360  | assignment  |
       | ECSE 429  | test        |
     When  I change the description of task "<task_name>" to "<new_description>"
-    Then  I should receive a confirmation that my operation was successful
+    Then  I should receive an error informing me that the requested resource was not found
     And   Task "<task_name>" should have description "<new_description>"
 
     Examples:

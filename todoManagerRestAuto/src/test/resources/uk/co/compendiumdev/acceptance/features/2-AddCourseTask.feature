@@ -15,7 +15,7 @@ Feature: Add Course Task
     Then  I should receive a confirmation that my operation was successful
     And   Task "<task_name>" should be under the "<course>" course to do list
     And   "<course>" course to do list should contain task "<task_name>"
-    And   "<course>" course to do list should contain 1 courses
+    And   "<course>" course to do list should contain 1 tasks
 
     Examples:
       | course    | task_name   |
@@ -36,7 +36,7 @@ Feature: Add Course Task
     Then  I should receive a confirmation that my operation was successful
     And   Task "<task_name>" should be under the "<course>" course to do list
     And   "<course>" course to do list should contain task "<task_name>"
-    And   "<course>" course to do list should contain <course_task_count> courses
+    And   "<course>" course to do list should contain <course_task_count> tasks
 
     Examples:
       | course    | task_name   | course_task_count |
@@ -54,8 +54,8 @@ Feature: Add Course Task
     When  I create a task "<task_name>"
     And   I add the task "<task_name>" to the "<course>" course to do list
     Then  I should receive an error informing me that the requested resource was not found
-    And   I should be informed that no course to do list exists for "<course>"
-    And   Task "<task_name>" should not be in the list of all tasks
+    And   Task "<task_name>" should not be under the "<course>" course to do list
+    And   Course to do list "<course>" should not exist in the system
 
     Examples:
       | course    | task_name   |
