@@ -1,5 +1,6 @@
 package uk.co.compendiumdev.acceptance.glue;
 
+import cucumber.api.DataTable;
 import cucumber.api.PendingException;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
@@ -9,11 +10,11 @@ import cucumber.api.java.en.When;
 public class TaskStepDefinitions {
 
     @Given("^The following tasks exist with their respective statuses and courses:$")
-    public void theFollowingTasksExistWithTheirRespectiveStatusesAndCourses() {
+    public void theFollowingTasksExistWithTheirRespectiveStatusesAndCourses(DataTable table) {
     }
 
     @Given("^The following tasks exist with their respective courses and descriptions:$")
-    public void theFollowingTasksExistWithTheirRespectiveCoursesAndDescriptions() {
+    public void theFollowingTasksExistWithTheirRespectiveCoursesAndDescriptions(DataTable table) {
     }
 
     @Given("^Task \"([^\"]*)\" exists for course \"([^\"]*)\" with completion status \"([^\"]*)\" and priority \"([^\"]*)\"$")
@@ -62,7 +63,7 @@ public class TaskStepDefinitions {
         throw new PendingException();
     }
 
-    @And("^Task \"([^\"]*)\" should have description \"([^\"]*)\"$")
+    @Then("^Task \"([^\"]*)\" should have description \"([^\"]*)\"$")
     public void taskShouldHaveDescription(String arg0, String arg1) throws Throwable {
         // Write code here that turns the phrase above into concrete actions
         throw new PendingException();

@@ -1,5 +1,6 @@
 package uk.co.compendiumdev.acceptance.glue;
 
+import cucumber.api.DataTable;
 import cucumber.api.PendingException;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
@@ -8,11 +9,11 @@ import cucumber.api.java.en.When;
 
 public class CourseStepDefinitions {
     @Given("^Projects exist for the following courses:$")
-    public void projectsExistForTheFollowingCourses() {
+    public void projectsExistForTheFollowingCourses(DataTable table) {
     }
 
     @Given("^The following tasks exist for their respective courses:$")
-    public void theFollowingTasksExistForTheirRespectiveCourses() {
+    public void theFollowingTasksExistForTheirRespectiveCourses(DataTable table) {
     }
 
     @Given("^No tasks exist for each course$")

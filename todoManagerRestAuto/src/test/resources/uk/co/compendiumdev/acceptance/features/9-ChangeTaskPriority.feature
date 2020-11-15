@@ -17,7 +17,6 @@ Feature: Change Task Priority
       | ECSE 202  |
       | COMP 251  |
     And   The following tasks exist with their respective statuses, courses and priority levels:
-    And   The following tasks exist with their respective statuses, courses and priority levels:
       | task                | completed           | course         | priority    |
       | task_A              | false               | ECSE 429       | HIGH        |
       | task_B              | false               | ECSE 420       | LOW         |

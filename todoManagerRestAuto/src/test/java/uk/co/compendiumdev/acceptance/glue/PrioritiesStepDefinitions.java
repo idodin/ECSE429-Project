@@ -1,5 +1,6 @@
 package uk.co.compendiumdev.acceptance.glue;
 
+import cucumber.api.DataTable;
 import cucumber.api.PendingException;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
@@ -9,7 +10,7 @@ import cucumber.api.java.en.When;
 public class PrioritiesStepDefinitions {
 
     @Given("^Categories exist for the following priority levels:$")
-    public void categoriesExistForTheFollowingPriorityLevels() {
+    public void categoriesExistForTheFollowingPriorityLevels(DataTable table) {
     }
 
     @Given("^No tasks exist for each priority level$")
