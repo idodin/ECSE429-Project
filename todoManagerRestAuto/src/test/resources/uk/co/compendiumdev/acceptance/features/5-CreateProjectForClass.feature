@@ -6,7 +6,8 @@ Feature: Create Project for Class
 
 
   Background:
-    Given Projects exist for the following courses:
+    Given The application is running
+    And   Projects exist for the following courses:
       | course    |
       | ECSE 429  |
       | ECSE 420  |

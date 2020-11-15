@@ -2,7 +2,8 @@ Feature: Query All Incomplete HIGH Priority Tasks
   As a student, I query all incomplete HIGH priority tasks from all my classes, to identify my short-term goals.
 
   Background:
-    Given Categories exist for the following priority levels:
+    Given The application is running
+    And   Categories exist for the following priority levels:
       | priority |
       | MEDIUM   |
       | LOW      |

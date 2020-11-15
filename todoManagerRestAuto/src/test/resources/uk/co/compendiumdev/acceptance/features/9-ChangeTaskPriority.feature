@@ -2,7 +2,8 @@ Feature: Change Task Priority
   As a student, I want to adjust the priority of a task, to help better manage my time.
 
   Background:
-    Given Categories exist for the following priority levels:
+    Given The application is running
+    And   Categories exist for the following priority levels:
       | priority |
       | HIGH     |
       | MEDIUM   |

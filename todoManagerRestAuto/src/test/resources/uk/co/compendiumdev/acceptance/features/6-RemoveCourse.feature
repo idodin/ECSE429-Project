@@ -2,7 +2,8 @@ Feature: Remove Course
   As a student, I remove a to do list for a class which I am no longer taking, to declutter my schedule.
 
   Background:
-    Given Categories exist for the following priority levels:
+    Given The application is running
+    And   Categories exist for the following priority levels:
       | priority |
       | HIGH     |
       | MEDIUM   |

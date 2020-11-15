@@ -2,7 +2,8 @@ Feature: Add Course Task
   As a student, I add a task to a course to do list, so I can remember it.
 
   Background:
-    Given Projects exist for the following courses:
+    Given The application is running
+    And   Projects exist for the following courses:
       | course    |
       | ECSE 429  |
       | ECSE 420  |

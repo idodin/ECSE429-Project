@@ -2,12 +2,13 @@ Feature: Remove Course Task
   As a student, I remove an unnecessary task from my course to do list, so I can forget about it.
 
   Background:
-    Given Categories exist for the following priority levels:
+    Given The application is running
+    And   Categories exist for the following priority levels:
       | priority |
       | HIGH     |
       | MEDIUM   |
       | LOW      |
-    And Projects exist for the following courses:
+    And   Projects exist for the following courses:
       | course    |
       | ECSE 429  |
       | ECSE 420  |

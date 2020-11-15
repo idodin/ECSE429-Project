@@ -3,7 +3,8 @@ Feature: Mark Task As Done
   track my accomplishments.
 
   Background:
-    Given Categories exist for the following priority levels:
+    Given The application is running
+    And   Categories exist for the following priority levels:
       | priority |
       | HIGH     |
       | MEDIUM   |

@@ -3,7 +3,8 @@ Feature: Change Task Description
   As a student, I want to change a task description to better represent the work that I do
 
   Background:
-    Given Categories exist for the following priority levels:
+    Given The application is running
+    And Categories exist for the following priority levels:
       | priority |
       | HIGH     |
       | MEDIUM   |
