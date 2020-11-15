@@ -1,7 +1,7 @@
 Feature: Change Task Priority
   As a student, I want to adjust the priority of a task, to help better manage my time.
 
-
+  # FIXME what is the difference between this and the next one
   Scenario Outline: The user successfully adjusts the priority of a task in non-empty projects (Normal Flow)
     Given Categories exist for the following priority levels:
       | priority |

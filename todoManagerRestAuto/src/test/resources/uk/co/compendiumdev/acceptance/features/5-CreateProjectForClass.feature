@@ -1,4 +1,10 @@
-# SHOULD BE ABOUT CREATING A PROJECT NOT A TASK
+# FIXME SHOULD BE ABOUT CREATING A PROJECT NOT A TASK
+# Whole scenario should be fixed
+
+# Normal flow - create project
+# Alternate flow - create project with description
+# Error flow - create project with invalid completedStatus (String, Integer)
+
 
 Feature: Create Project for Class
   As a student, I create a to do list for a new class I am taking, so I can manage course work.

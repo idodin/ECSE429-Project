@@ -10,16 +10,16 @@ Feature: Set Task Priority
       | MEDIUM   |
       | LOW      |
     And   No tasks exist for each priority level
-    When  I create a task "<task_name>"
+    When  I create a task with name "<task_name>"
     And   I categorize a task as "<priority>" priority level
     Then  Task "<task_name>" should be categorized "<priority>"
     And   Category "<priority>" should contain task "<task_name>"
 
     Examples:
-      | priority |task_name |
-      | HIGH     | task_A   |
-      | MEDIUM   | task_B   |
-      | LOW      | task_C   |
+      | priority | task_name  |
+      | HIGH     | task_A     |
+      | MEDIUM   | task_B     |
+      | LOW      | task_C     |
 
 
   Scenario Outline: The user successfully categorizes a task as a given priority when other tasks with that priority already exist (Alternate Flow)
@@ -33,7 +33,7 @@ Feature: Set Task Priority
       | task_A    | HIGH      |
       | task_B    | LOW       |
       | task_C    | MEDIUM    |
-    When  I create a task "<task_name>"
+    When  I create a task with name "<task_name>"
     And   I categorize a task as "<priority>" priority level
     Then  Task "<task_name>" should be categorized "<priority>"
     And   Category "<priority>" should contain task "<task_name>"
@@ -52,7 +52,7 @@ Feature: Set Task Priority
     Then  I should receive an error informing me that "<new_priority>" priority level does not exist
 
     Examples:
-    | existing_priority_1 | existing_priority_2 | new_priority  | task_name   |
-    | LOW                 | MEDIUM              | HIGH          | assignment  |
-    | MEDIUM              | HIGH                | LOW           | lab         |
-    | HIGH                | LOW                 | MEDIUM        | report      |
+      | existing_priority_1 | existing_priority_2 | new_priority  | task_name   |
+      | LOW                 | MEDIUM              | HIGH          | assignment  |
+      | MEDIUM              | HIGH                | LOW           | lab         |
+      | HIGH                | LOW                 | MEDIUM        | report      |
