@@ -19,7 +19,7 @@ Feature: Create Project for Class
     And   A course to do list for course "<course>" should exist
     And   The course to do list for course "<course>" should have active status "<active>"
     And   The course to do list for course "<course>" should have completion status "<complete>"
-    And   The list of course to do lists should now include a to do list for course "<course>"
+    And   The list of course to do lists should include a to do list for course "<course>"
 
     Examples:
       | course    | active  | complete  |
@@ -35,7 +35,7 @@ Feature: Create Project for Class
     And   A course to do list for course "<course>" should exist
     And   The course to do list for course "<course>" should have active status "<active>"
     And   The course to do list for course "<course>" should have completion status "<complete>"
-    And   The list of course to do lists should now include a to do list for course "<course>"
+    And   The list of course to do lists should include a to do list for course "<course>"
 
     Examples:
       | course    | active  | complete  | description   |

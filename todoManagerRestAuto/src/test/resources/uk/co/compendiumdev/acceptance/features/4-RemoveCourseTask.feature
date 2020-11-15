@@ -24,7 +24,7 @@ Feature: Remove Course Task
     Then  I should receive a confirmation that my operation was successful
     And   Task "<task_name>" should not be under the "<course>" course to do list
     And   "<course>" course to do list should not contain task "<task_name>"
-    And   "<course>" course to do list should contain <course_task_count> courses
+    And   "<course>" course to do list should contain <course_task_count> tasks
 
     Examples:
       | course    | task_name   | course_task_count |
@@ -41,9 +41,9 @@ Feature: Remove Course Task
       | COMP 360  | study       | MEDIUM          | false |
       | COMP 360  | assignment1 | HIGH            | true  |
     When  I remove the task "<task_name>" from the "<course>" course to do list
-    Then  I should receive a confirmation that the operation was successful
+    Then  I should receive a confirmation that my operation was successful
     And   "<course>" course to do list should not contain task "<task_name>"
-    And   "<course>" course to do list should contain <course_task_count> courses
+    And   "<course>" course to do list should contain <course_task_count> tasks
     And   Category "<priority>" should not contain task "<task_name>"
 
     Examples:
@@ -64,7 +64,7 @@ Feature: Remove Course Task
     Then  I should receive an error informing me that the requested resource was not found
     And   Task "<task_name>" should not be under the "<course>" course to do list
     And   "<course>" course to do list should not contain task "<task_name>"
-    And   "<course>" course to do list should contain <course_task_count> courses
+    And   "<course>" course to do list should contain <course_task_count> tasks
 
     Examples:
       | course    | task_name   | course_task_count |
