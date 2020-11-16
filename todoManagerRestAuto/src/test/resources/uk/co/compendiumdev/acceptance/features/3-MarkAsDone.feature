@@ -31,7 +31,6 @@ Feature: Mark Task As Done
     When   I mark task "<task>"'s completion status as "<completed>"
     Then   I should receive a confirmation that my operation was successful
     And    The completion status of task "<task>" should be "<completed>"
-    And   Task "<task_name>" should be categorized as "<priority>" priority
     And   Category "<priority>" should contain task "<task_name>"
     And   Task "<task_name>" should be under the "<course>" course to do list
     And   "<course>" course to do list should contain task "<task_name>"
@@ -47,7 +46,6 @@ Feature: Mark Task As Done
     When  I mark task "<task>"'s completion status as "<completed>"
     Then  I should receive a confirmation that my operation was successful
     And   The completion status of task "<task>" should be "<completed>"
-    And   Task "<task_name>" should be categorized as "<priority>" priority
     And   Category "<priority>" should contain task "<task_name>"
     And   Task "<task_name>" should be under the "<course>" course to do list
     And   "<course>" course to do list should contain task "<task_name>"
@@ -63,7 +61,6 @@ Feature: Mark Task As Done
     When  I mark task "<task>"'s completion status as "<completed>"
     Then  I should receive an error informing me that the passed information was invalid
     And   The completion status of task "<task>" should be false
-    And   Task "<task_name>" should be categorized as "<priority>" priority
     And   Category "<priority>" should contain task "<task_name>"
     And   Task "<task_name>" should be under the "<course>" course to do list
     And   "<course>" course to do list should contain task "<task_name>"

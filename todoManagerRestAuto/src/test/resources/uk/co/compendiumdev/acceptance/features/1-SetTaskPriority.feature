@@ -27,7 +27,6 @@ Feature: Set Task Priority
     Given No tasks exist for each priority level
     When  I categorize task "<task_name>" as "<priority>" priority
     Then  I should receive a confirmation that my operation was successful
-    And   Task "<task_name>" should be categorized as "<priority>" priority
     And   Category "<priority>" should contain task "<task_name>"
     And   Task "<task_name>" should be under the "<course>" course to do list
     And   "<course>" course to do list should contain task "<task_name>"
@@ -47,7 +46,6 @@ Feature: Set Task Priority
       | task_C              | false               | COMP 360       | MEDIUM      |
     When  I categorize task "<task_name>" as "<priority>" priority
     Then  I should receive a confirmation that my operation was successful
-    And   Task "<task_name>" should be categorized as "<priority>" priority
     And   Category "<priority>" should contain task "<task_name>"
     And   Category "<priority>" should still contain its original tasks
     And   Task "<task_name>" should be under the "<course>" course to do list
@@ -62,7 +60,6 @@ Feature: Set Task Priority
   Scenario Outline: The user attempts to categorize a task as a given priority when no category exists for that priority level (Error Flow)
     When  I categorize task "<task_name>" as "<priority>" priority
     Then  I should receive an error informing me that the requested resource was not found
-    And   Task "<task_name>" should not be categorized as any priority
     And   Task "<task_name>" should be under the "<course>" course to do list
     And   "<course>" course to do list should contain task "<task_name>"
 

@@ -20,7 +20,6 @@ Feature: Create Project for Class
     And   A course to do list for course "<course>" should exist
     And   The course to do list for course "<course>" should have active status "<active>"
     And   The course to do list for course "<course>" should have completion status "<complete>"
-    And   The list of course to do lists should include a to do list for course "<course>"
 
     Examples:
       | course    | active  | complete  |
@@ -36,7 +35,6 @@ Feature: Create Project for Class
     And   A course to do list for course "<course>" should exist
     And   The course to do list for course "<course>" should have active status "<active>"
     And   The course to do list for course "<course>" should have completion status "<complete>"
-    And   The list of course to do lists should include a to do list for course "<course>"
 
     Examples:
       | course    | active  | complete  | description   |
@@ -49,7 +47,7 @@ Feature: Create Project for Class
   Scenario Outline: The user attempts to create a course to do list with an invalid completion status (Alternate Flow)
     When  I create a course to do list for course "<course>" with active status "<active>", completion status "<complete>" and description "<description>"
     Then  I should receive an error informing me that the passed information was invalid
-    And   A course to do list for course "<course>" should not exist
+    And   Course to do list "<course>" should not exist in the system
 
     Examples:
       | course    | active  | complete  | description   |
