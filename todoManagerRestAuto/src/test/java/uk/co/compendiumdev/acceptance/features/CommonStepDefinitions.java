@@ -148,5 +148,6 @@ public class CommonStepDefinitions {
         CourseStepDefinitions.courseToId.clear();
         TaskStepDefinitions.taskToId.clear();
         PrioritiesStepDefinitions.priorityToId.clear();
+        TaskStepDefinitions.courseToIncomplete.clear();
     }
 }

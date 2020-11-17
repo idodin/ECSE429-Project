@@ -28,9 +28,9 @@ Feature: Mark Task As Done
 
 
   Scenario Outline: The user successfully marks an incomplete task as done (Normal Flow)
-    When   I mark task "<task>"'s completion status as "<completed>"
+    When   I mark task "<task_name>"'s completion status as "<completed>"
     Then   I should receive a confirmation that my operation was successful
-    And    The completion status of task "<task>" should be "<completed>"
+    And    The completion status of task "<task_name>" should be "<completed>"
     And   Category "<priority>" should contain task "<task_name>"
     And   Task "<task_name>" should be under the "<course>" course to do list
     And   "<course>" course to do list should contain task "<task_name>"
@@ -43,9 +43,9 @@ Feature: Mark Task As Done
 
 
   Scenario Outline: The user successfully marks a task that has already been completed as done (Alternate Flow)
-    When  I mark task "<task>"'s completion status as "<completed>"
+    When  I mark task "<task_name>"'s completion status as "<completed>"
     Then  I should receive a confirmation that my operation was successful
-    And   The completion status of task "<task>" should be "<completed>"
+    And   The completion status of task "<task_name>" should be "<completed>"
     And   Category "<priority>" should contain task "<task_name>"
     And   Task "<task_name>" should be under the "<course>" course to do list
     And   "<course>" course to do list should contain task "<task_name>"
@@ -58,15 +58,16 @@ Feature: Mark Task As Done
 
 
   Scenario Outline: The user attempts to mark a task as an invalid completion status (Error Flow)
-    When  I mark task "<task>"'s completion status as "<completed>"
+    When  I mark task "<task_name>"'s completion status as "<completed>"
     Then  I should receive an error informing me that the passed information was invalid
-    And   The completion status of task "<task>" should be false
+    And   The completion status of task "<task_name>" should be "<status>"
     And   Category "<priority>" should contain task "<task_name>"
     And   Task "<task_name>" should be under the "<course>" course to do list
     And   "<course>" course to do list should contain task "<task_name>"
 
     Examples:
-      | task_name  | completed   | course   | priority  |
-      | task_D     | done        | ECSE 223 | HIGH      |
-      | task_E     | 1           | ECSE 202 | LOW       |
-      | task_F     | yes         | COMP 251 | MEDIUM    |
+      | task_name  | completed   | course   | priority  | status  |
+      | task_A     | blah        | ECSE 429 | HIGH      | false   |
+      | task_D     | done        | ECSE 223 | HIGH      | true    |
+      | task_E     | 1           | ECSE 202 | LOW       | true    |
+      | task_F     | yes         | COMP 251 | MEDIUM    | true    |

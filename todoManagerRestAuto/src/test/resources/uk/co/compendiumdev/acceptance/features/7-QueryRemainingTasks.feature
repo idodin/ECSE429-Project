@@ -10,28 +10,33 @@ Feature: Query Remaining Tasks
       | LOW      |
     And   Projects exist for the following courses:
       | projects |
-      | ECSE_429 |
-      | ECSE_420 |
-      | ECSE_427 |
-      | ECSE_211 |
+      | ECSE 429 |
+      | ECSE 420 |
+      | ECSE 427 |
+      | ECSE 211 |
     And   The following tasks exist with their respective statuses and courses:
-      | task   | statuses | projects |
-      | task_A | false    | ECSE_429 |
-      | task_B | false    | ECSE_420 |
-      | task_C | true     | ECSE_427 |
-      | task_D | true     | ECSE_211 |
+      | task   | completed | projects |
+      | task_A | false     | ECSE 429 |
+      | task_B | false     | ECSE 429 |
+      | task_C | true      | ECSE 429 |
+      | task_D | true      | ECSE 429 |
+      | task_E | false     | COMP 360 |
+      | task_F | false     | COMP 360 |
+      | task_G | true      | COMP 360 |
+      | task_H | true      | COMP 360 |
 
 
   # TODO Maybe more tasks returned?
   Scenario Outline: The user successfulLy queries all incomplete task in a course to do list (Normal Flow)
     When  I query all incomplete tasks for the "<course>" course to do list
     Then  I should receive a confirmation that my operation was successful
-    And   the task "<task>" should be returned
+    And   the task "<task1>" should be returned
+    And   the task "<task2>" should be returned
 
     Examples:
-      | course    |
-      | ECSE_427  |
-      | ECSE_211  |
+      | course    | task1   | task2   |
+      | ECSE 429  | task_A  | task_B  |
+      | COMP 360  | task_E  | task_F  |
 
 
   Scenario Outline: The user successfully queries all incomplete tasks in a course to do list with no incomplete tasks (Alternate Flow)
@@ -41,8 +46,8 @@ Feature: Query Remaining Tasks
 
     Examples:
       | course    |
-      | ECSE_429  |
-      | ECSE_420  |
+      | ECSE 427  |
+      | ECSE 211  |
 
 
   Scenario Outline: The user attempts to request all incomplete tasks for a course that does not exist (Error Flow)
@@ -51,5 +56,5 @@ Feature: Query Remaining Tasks
 
     Examples:
       | course    |
-      | ECSE_551  |
-      | ECSE_451  |
+      | ECSE 551  |
+      | ECSE 451  |

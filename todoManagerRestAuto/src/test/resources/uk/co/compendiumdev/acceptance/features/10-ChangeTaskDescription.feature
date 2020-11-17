@@ -60,7 +60,6 @@ Feature: Change Task Description
       | ECSE 429  | test        |
     When  I change the description of task "<task_name>" to "<new_description>"
     Then  I should receive an error informing me that the requested resource was not found
-    And   Task "<task_name>" should have description "<new_description>"
 
     Examples:
       | task_name   | new_description   |

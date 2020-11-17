@@ -34,6 +34,7 @@ public class CourseStepDefinitions {
     private static final String PROJECTS = "projects";
     private static final String ACTIVE = "active";
     private static final String COMPLETED = "completed";
+    private static final String DESCRIPTION = "description";
 
     public static final Map<String, String> courseToId = new HashMap<>();
 
@@ -142,29 +143,84 @@ public class CourseStepDefinitions {
         final HashMap<String, Object> givenBody = new HashMap<>();
         givenBody.put(ID, String.valueOf(TaskStepDefinitions.taskToId.get(taskName)));
 
-        given().
+        CommonStepDefinitions.lastResponse.addFirst(
+                given().
                 pathParam(ID, CourseStepDefinitions.courseToId.getOrDefault(course, "-1")).
                 body(givenBody).
                 when().
-                post(PROJECT_TO_TODO_PATH);
+                post(PROJECT_TO_TODO_PATH).then().extract()
+        );
     }
 
     @When("^I remove the \"([^\"]*)\" course to do list$")
-    public void iRemoveTheCourseToDoList(String arg0) throws Throwable {
-        // Write code here that turns the phrase above into concrete actions
-        throw new PendingException();
+    public void iRemoveTheCourseToDoList(String course) throws Throwable {
+        CommonStepDefinitions.lastResponse.addFirst(
+                given().
+                pathParam(ID, CourseStepDefinitions.courseToId.getOrDefault(course, "-1")).
+                when().
+                delete(SPECIFIC_PROJECTS_PATH)
+                .then()
+                .extract()
+        );
     }
 
     @When("^I create a course to do list for course \"([^\"]*)\" with active status \"([^\"]*)\" and completion status \"([^\"]*)\"$")
-    public void iCreateACourseToDoListForCourseWithActiveStatusAndCompletionStatus(String arg0, String arg1, String arg2) throws Throwable {
-        // Write code here that turns the phrase above into concrete actions
-        throw new PendingException();
+    public void iCreateACourseToDoListForCourseWithActiveStatusAndCompletionStatus(String course, String active, String complete) throws Throwable {
+        final Map<String, Object> givenBody = new HashMap<>();
+        givenBody.put(TITLE, course);
+
+        if(active.equals("true")) givenBody.put(ACTIVE, true);
+        else if (active.equals("false")) givenBody.put(ACTIVE, false);
+        else givenBody.put(ACTIVE, active);
+
+        if(complete.equals("true")) givenBody.put(COMPLETED, true);
+        else if (complete.equals("false")) givenBody.put(COMPLETED, false);
+        else givenBody.put(COMPLETED, complete);
+
+        CommonStepDefinitions.lastResponse.addFirst(
+                given().
+                body(givenBody).
+                when().
+                post(ALL_PROJECTS_PATH).
+                then().
+                contentType(ContentType.JSON).
+                statusCode(HttpStatus.SC_CREATED).
+                body(
+                        TITLE, equalTo(course)
+                ).
+                extract());
+
+        String courseId = CommonStepDefinitions.lastResponse.getFirst().path(ID);
+
+        CourseStepDefinitions.courseToId.put(course, courseId);
     }
 
     @When("^I create a course to do list for course \"([^\"]*)\" with active status \"([^\"]*)\", completion status \"([^\"]*)\" and description \"([^\"]*)\"$")
-    public void iCreateACourseToDoListForCourseWithActiveStatusCompletionStatusAndDescription(String arg0, String arg1, String arg2, String arg3) throws Throwable {
-        // Write code here that turns the phrase above into concrete actions
-        throw new PendingException();
+    public void iCreateACourseToDoListForCourseWithActiveStatusCompletionStatusAndDescription(String course, String active, String complete, String description) throws Throwable {
+        final Map<String, Object> givenBody = new HashMap<>();
+
+        givenBody.put(TITLE, course);
+        givenBody.put(DESCRIPTION, description);
+
+        if(active.equals("true")) givenBody.put(ACTIVE, true);
+        else if (active.equals("false")) givenBody.put(ACTIVE, false);
+        else givenBody.put(ACTIVE, active);
+
+        if(complete.equals("true")) givenBody.put(COMPLETED, true);
+        else if (complete.equals("false")) givenBody.put(COMPLETED, false);
+        else givenBody.put(COMPLETED, complete);
+
+        CommonStepDefinitions.lastResponse.addFirst(given().
+                body(givenBody).
+                when().
+                post(ALL_PROJECTS_PATH).
+                then().
+                contentType(ContentType.JSON).
+                extract());
+
+        String courseId = CommonStepDefinitions.lastResponse.getFirst().path(ID);
+
+        CourseStepDefinitions.courseToId.put(course, courseId);
     }
 
     @Then("^\"([^\"]*)\" course to do list should contain (\\d+) tasks$")
@@ -303,5 +359,10 @@ public class CourseStepDefinitions {
         assertEquals(completed, (projects.stream().filter(
                 project -> project.get(TITLE).equals(course)
         ).findFirst().orElse(new HashMap<String, Object>())).getOrDefault(COMPLETED, "-1"));
+    }
+
+    @And("^I remove the \"([^\"]*)\" course to do list again$")
+    public void iRemoveTheCourseToDoListAgain(String course) throws Throwable {
+        iRemoveTheCourseToDoList(course);
     }
 }

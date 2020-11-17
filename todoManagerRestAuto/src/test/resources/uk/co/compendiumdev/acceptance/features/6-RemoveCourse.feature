@@ -50,7 +50,7 @@ Feature: Remove Course
       | ECSE 420  |
       | COMP 360  |
 
-  Scenario Outline: The user attempts to remove a task that has already been removed from the course to do list (Error Flow)
+  Scenario Outline: The user attempts to remove a course that has already been removed (Error Flow)
     Given The following tasks exist for their respective courses:
       | course    | task_name   |
       | ECSE 429  | assignment0 |
@@ -58,6 +58,7 @@ Feature: Remove Course
       | COMP 360  | study       |
       | COMP 360  | assignment1 |
     When  I remove the "<course>" course to do list
+    And   I remove the "<course>" course to do list again
     Then  I should receive an error informing me that the requested resource was not found
     And   Tasks that were under the "<course>" course to do list should not exist in the system
     And   Course to do list "<course>" should not exist in the system

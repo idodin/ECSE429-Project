@@ -36,11 +36,11 @@ Feature: Remove Course Task
 
   Scenario Outline: The user successfully removes a prioritized task from the course to do list (Alternative Flow)
     Given  The following tasks exist with their respective statuses, courses and priority levels:
-      | course    | task_name   | priority_level  | done  |
-      | ECSE 429  | assignment0 | HIGH            | false |
-      | ECSE 420  | lab5-1      | LOW             | true  |
-      | COMP 360  | study       | MEDIUM          | false |
-      | COMP 360  | assignment1 | HIGH            | true  |
+      | task                | completed           | course         | priority    |
+      | assignment0         | false               | ECSE 429       | HIGH        |
+      | lab5-1              | true                | ECSE 420       | LOW         |
+      | study               | false               | COMP 360       | MEDIUM      |
+      | assignment1         | false               | COMP 360       | MEDIUM      |
     When  I remove the task "<task_name>" from the "<course>" course to do list
     Then  I should receive a confirmation that my operation was successful
     And   "<course>" course to do list should not contain task "<task_name>"

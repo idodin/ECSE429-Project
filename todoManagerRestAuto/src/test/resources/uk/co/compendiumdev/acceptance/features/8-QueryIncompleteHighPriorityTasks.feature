@@ -22,7 +22,7 @@ Feature: Query All Incomplete HIGH Priority Tasks
     And   Task "<task_name_3>" exists for course "<course3>" with completion status "<status3>" and priority "<priority3>"
     And   Task "<task_name_4>" exists for course "<course4>" with completion status "<status4>" and priority "<priority4>"
     When  I query all incomplete HIGH priority tasks for all courses
-    Then  I should receive a confirmation that the operation was successful
+    Then  I should receive a confirmation that my operation was successful
     And   I should receive a list of all incomplete tasks from all courses as a response
 
     Examples:
@@ -40,7 +40,7 @@ Feature: Query All Incomplete HIGH Priority Tasks
     And   Task "<task_name_3>" exists for course "<course3>" with completion status "<status3>" and priority "<priority3>"
     And   Task "<task_name_4>" exists for course "<course4>" with completion status "<status4>" and priority "<priority4>"
     When  I query all incomplete HIGH priority tasks for all courses
-    Then  I should receive a confirmation that the operation was successful
+    Then  I should receive a confirmation that my operation was successful
     And   I should receive a list of all incomplete tasks from all courses as a response
 
     Examples:
