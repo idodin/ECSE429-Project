@@ -1,4 +1,3 @@
-#TODO could add additional scenarios for tasks with priorities
 Feature: Change Task Description
   As a student, I want to change a task description to better represent the work that I do
 

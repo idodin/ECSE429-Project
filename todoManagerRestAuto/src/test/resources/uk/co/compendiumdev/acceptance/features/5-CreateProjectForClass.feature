@@ -1,6 +1,3 @@
-#TODO maybe add more cases
-#  - Alternate: create without specifying active / completion stauts
-#  - Error:  create with incorrect active status
 Feature: Create Project for Class
   As a student, I create a to do list for a new class I am taking, so I can manage course work.
 

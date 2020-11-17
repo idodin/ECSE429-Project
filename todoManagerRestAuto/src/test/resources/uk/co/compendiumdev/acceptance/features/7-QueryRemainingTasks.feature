@@ -26,7 +26,6 @@ Feature: Query Remaining Tasks
       | task_H | true      | COMP 360 |
 
 
-  # TODO Maybe more tasks returned?
   Scenario Outline: The user successfulLy queries all incomplete task in a course to do list (Normal Flow)
     When  I query all incomplete tasks for the "<course>" course to do list
     Then  I should receive a confirmation that my operation was successful
